@@ -17,9 +17,7 @@ use Illuminate\Validation\ValidationException;
 
 class BookingPaymentService
 {
-    public function __construct(private readonly FawryClient $fawry)
-    {
-    }
+    public function __construct(private readonly FawryClient $fawry) {}
 
     /**
      * @param  array<string, mixed>  $data
@@ -63,13 +61,13 @@ class BookingPaymentService
             ]);
 
             $payment->update([
-                'request_payload' => $this->fawry->buildChargePayload($booking->loadMissing('package'), $payment),
+                'request_payload' => $this->fawry->buildHostedCheckoutPayload($booking->loadMissing('package'), $payment),
             ]);
 
             return [$booking, $payment];
         });
 
-        $response = $this->fawry->createPaymentReference($booking->loadMissing('package'), $payment);
+        $response = $this->fawry->createHostedCheckout($booking->loadMissing('package'), $payment);
 
         $payment->update([
             'fawry_reference_number' => Arr::get($response, 'referenceNumber') ?: Arr::get($response, 'fawryRefNumber'),
@@ -119,6 +117,52 @@ class BookingPaymentService
 
             $payment->update([
                 'fawry_reference_number' => Arr::get($payload, 'fawryRefNumber', $payment->fawry_reference_number),
+                'status' => $status,
+                'fawry_fees' => Arr::get($payload, 'fawryFees', $payment->fawry_fees),
+                'paid_at' => $paidAt,
+                'webhook_payload' => $payload,
+            ]);
+
+            $payment->booking->update([
+                'status' => $this->bookingStatusFromPayment($status),
+                'paid_at' => $paidAt,
+            ]);
+        });
+
+        $payment->refresh()->loadMissing('booking.package');
+
+        if ($payment->status === PaymentStatus::Paid) {
+            $this->sendPaymentSuccessEmail($payment->booking);
+        }
+
+        return $payment;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    public function applyFawryReturnResponse(array $payload): ?Payment
+    {
+        if (! $this->fawry->chargeResponseSignatureMatches($payload)) {
+            return null;
+        }
+
+        $merchantReference = (string) (Arr::get($payload, 'merchantRefNumber') ?: Arr::get($payload, 'merchantRefNum'));
+        $payment = Payment::query()
+            ->where('merchant_ref_number', $merchantReference)
+            ->with('booking.package')
+            ->first();
+
+        if (! $payment) {
+            return null;
+        }
+
+        $status = $this->paymentStatusFromFawry((string) Arr::get($payload, 'orderStatus', 'PENDING'));
+        $paidAt = $status === PaymentStatus::Paid ? now() : $payment->paid_at;
+
+        DB::transaction(function () use ($payment, $payload, $status, $paidAt): void {
+            $payment->update([
+                'fawry_reference_number' => Arr::get($payload, 'referenceNumber', $payment->fawry_reference_number),
                 'status' => $status,
                 'fawry_fees' => Arr::get($payload, 'fawryFees', $payment->fawry_fees),
                 'paid_at' => $paidAt,

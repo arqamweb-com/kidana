@@ -59,17 +59,17 @@ test('custom package request stores a booking', function () {
         ->total_amount->toBe('2500.00');
 });
 
-test('fawry checkout creates payment reference', function () {
+test('fawry checkout redirects to hosted card checkout', function () {
     config([
         'fawry.merchant_code' => 'TEST-MERCHANT',
         'fawry.secure_key' => 'secret',
         'fawry.endpoint' => 'https://example.test/fawry',
+        'fawry.payment_method' => 'CARD',
     ]);
 
     Http::fake([
         'https://example.test/fawry' => Http::response([
-            'referenceNumber' => '987654321',
-            'orderStatus' => 'PENDING',
+            'paymentUrl' => 'https://atfawry.fawrystaging.com/checkout/abc123',
         ]),
     ]);
 
@@ -80,8 +80,7 @@ test('fawry checkout creates payment reference', function () {
 
     $response = $this->post(route('packages.checkout.store', ['package' => $package->slug]), bookingPayload());
 
-    $response->assertSuccessful();
-    $response->assertSee('987654321');
+    $response->assertRedirect('https://atfawry.fawrystaging.com/checkout/abc123');
 
     $payment = Payment::first();
 
@@ -89,11 +88,15 @@ test('fawry checkout creates payment reference', function () {
         ->not->toBeNull()
         ->status->toBe(PaymentStatus::Pending)
         ->amount->toBe('3000.00')
-        ->fawry_reference_number->toBe('987654321');
+        ->fawry_reference_number->toBeNull()
+        ->payment_method->toBe('CARD');
 
     Http::assertSent(fn ($request): bool => $request['merchantCode'] === 'TEST-MERCHANT'
         && $request['merchantRefNum'] === $payment->merchant_ref_number
-        && $request['amount'] === '3000.00');
+        && $request['amount'] === '3000.00'
+        && $request['paymentMethod'] === 'CARD'
+        && filled($request['returnUrl'])
+        && filled($request['orderWebHookUrl']));
 });
 
 test('fawry webhook marks booking paid and queues confirmation email', function () {
@@ -120,7 +123,7 @@ test('fawry webhook marks booking paid and queues confirmation email', function 
         'paymentAmount' => '3000.00',
         'orderAmount' => '3000.00',
         'orderStatus' => 'PAID',
-        'paymentMethod' => 'PayAtFawry',
+        'paymentMethod' => 'CARD',
         'paymentReferenceNumber' => '1122334455',
     ];
     $payload['messageSignature'] = fawryNotificationSignature($payload, 'secret');
@@ -136,6 +139,52 @@ test('fawry webhook marks booking paid and queues confirmation email', function 
         ->status->toBe(BookingStatus::Paid)
         ->paid_at->not->toBeNull()
         ->payment_success_email_sent_at->not->toBeNull();
+
+    Mail::assertQueued(BookingPaymentSucceeded::class);
+});
+
+test('fawry return response can mark booking paid', function () {
+    config([
+        'fawry.secure_key' => 'secret',
+    ]);
+    Mail::fake();
+
+    $booking = Booking::factory()->create([
+        'status' => BookingStatus::AwaitingPayment,
+        'total_amount' => 3000,
+        'currency' => 'EGP',
+    ]);
+    $payment = Payment::factory()->create([
+        'booking_id' => $booking->id,
+        'merchant_ref_number' => 'BK-2-20260520100000',
+        'status' => PaymentStatus::Pending,
+        'amount' => 3000,
+        'currency' => 'EGP',
+        'payment_method' => 'CARD',
+    ]);
+    $payload = [
+        'referenceNumber' => '99887766',
+        'merchantRefNumber' => $payment->merchant_ref_number,
+        'paymentAmount' => '3000.00',
+        'orderAmount' => '3000.00',
+        'orderStatus' => 'PAID',
+        'paymentMethod' => 'CARD',
+        'fawryFees' => '0.00',
+        'customerMail' => $booking->customer_email,
+        'customerMobile' => $booking->customer_mobile,
+    ];
+    $payload['signature'] = fawryReturnSignature($payload, 'secret');
+
+    $this->get(route('bookings.result', ['booking' => $booking->id, ...$payload]))
+        ->assertSuccessful()
+        ->assertSee('99887766');
+
+    expect($payment->refresh())
+        ->status->toBe(PaymentStatus::Paid)
+        ->fawry_reference_number->toBe('99887766')
+        ->and($booking->refresh())
+        ->status->toBe(BookingStatus::Paid)
+        ->paid_at->not->toBeNull();
 
     Mail::assertQueued(BookingPaymentSucceeded::class);
 });
@@ -168,6 +217,27 @@ function fawryNotificationSignature(array $payload, string $secureKey): string
         $payload['orderStatus'],
         $payload['paymentMethod'],
         $payload['paymentReferenceNumber'],
+        $secureKey,
+    ]));
+}
+
+/**
+ * @param  array<string, mixed>  $payload
+ */
+function fawryReturnSignature(array $payload, string $secureKey): string
+{
+    return hash('sha256', implode('', [
+        $payload['referenceNumber'],
+        $payload['merchantRefNumber'],
+        $payload['paymentAmount'],
+        $payload['orderAmount'],
+        $payload['orderStatus'],
+        $payload['paymentMethod'],
+        $payload['fawryFees'],
+        '',
+        '',
+        $payload['customerMail'],
+        $payload['customerMobile'],
         $secureKey,
     ]));
 }

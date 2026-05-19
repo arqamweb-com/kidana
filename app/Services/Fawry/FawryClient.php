@@ -9,9 +9,7 @@ use Illuminate\Support\Arr;
 
 class FawryClient
 {
-    public function __construct(private readonly HttpFactory $http)
-    {
-    }
+    public function __construct(private readonly HttpFactory $http) {}
 
     public function isConfigured(): bool
     {
@@ -21,9 +19,9 @@ class FawryClient
     /**
      * @return array<string, mixed>
      */
-    public function createPaymentReference(Booking $booking, Payment $payment): array
+    public function createHostedCheckout(Booking $booking, Payment $payment): array
     {
-        $payload = $this->buildChargePayload($booking, $payment);
+        $payload = $this->buildHostedCheckoutPayload($booking, $payment);
 
         $response = $this->http
             ->acceptJson()
@@ -32,10 +30,23 @@ class FawryClient
             ->connectTimeout(5)
             ->retry(2, 200)
             ->post((string) config('fawry.endpoint'), $payload)
-            ->throw()
-            ->json();
+            ->throw();
 
-        return is_array($response) ? $response : [];
+        $json = $response->json();
+
+        if (is_array($json)) {
+            return [
+                ...$json,
+                'paymentUrl' => $this->paymentUrlFromResponse($json),
+            ];
+        }
+
+        $body = trim($response->body());
+
+        return [
+            'paymentUrl' => filter_var($body, FILTER_VALIDATE_URL) ? $body : null,
+            'raw' => $body,
+        ];
     }
 
     public function notificationSignatureMatches(array $payload): bool
@@ -49,15 +60,32 @@ class FawryClient
         return hash_equals(strtolower($providedSignature), $this->notificationSignature($payload));
     }
 
+    public function chargeResponseSignatureMatches(array $payload): bool
+    {
+        $providedSignature = (string) Arr::get($payload, 'signature');
+
+        if (blank($providedSignature)) {
+            return false;
+        }
+
+        return hash_equals(strtolower($providedSignature), $this->chargeResponseSignature($payload));
+    }
+
     /**
      * @return array<string, mixed>
      */
-    public function buildChargePayload(Booking $booking, Payment $payment): array
+    public function buildHostedCheckoutPayload(Booking $booking, Payment $payment): array
     {
         $amount = $this->formatAmount($payment->amount);
         $paymentMethod = (string) config('fawry.payment_method');
         $merchantCode = (string) config('fawry.merchant_code');
         $customerProfileId = (string) $booking->id;
+        $returnUrl = route('bookings.result', [
+            'locale' => $booking->locale,
+            'booking' => $booking,
+        ]);
+        $itemId = (string) $booking->package_id;
+        $quantity = '1';
 
         return [
             'merchantCode' => $merchantCode,
@@ -72,15 +100,18 @@ class FawryClient
             'language' => $booking->locale === 'ar' ? 'ar-eg' : 'en-gb',
             'chargeItems' => [
                 [
-                    'itemId' => (string) $booking->package_id,
+                    'itemId' => $itemId,
                     'description' => (string) $booking->package->name,
                     'price' => $amount,
-                    'quantity' => '1',
+                    'quantity' => $quantity,
                 ],
             ],
             'paymentMethod' => $paymentMethod,
+            'returnUrl' => $returnUrl,
+            'orderWebHookUrl' => route('payments.fawry.webhook'),
+            'authCaptureModePayment' => false,
             'description' => (string) $booking->package->name,
-            'signature' => hash('sha256', $merchantCode.$payment->merchant_ref_number.$customerProfileId.$paymentMethod.$amount.(string) config('fawry.secure_key')),
+            'signature' => hash('sha256', $merchantCode.$payment->merchant_ref_number.$customerProfileId.$returnUrl.$itemId.$quantity.$amount.(string) config('fawry.secure_key')),
         ];
     }
 
@@ -103,5 +134,41 @@ class FawryClient
         ]);
 
         return hash('sha256', $signaturePayload);
+    }
+
+    protected function chargeResponseSignature(array $payload): string
+    {
+        $signaturePayload = implode('', [
+            (string) Arr::get($payload, 'referenceNumber', ''),
+            (string) Arr::get($payload, 'merchantRefNumber', Arr::get($payload, 'merchantRefNum', '')),
+            $this->formatAmount(Arr::get($payload, 'paymentAmount', Arr::get($payload, 'amount', 0))),
+            $this->formatAmount(Arr::get($payload, 'orderAmount', Arr::get($payload, 'amount', 0))),
+            (string) Arr::get($payload, 'orderStatus', ''),
+            (string) Arr::get($payload, 'paymentMethod', ''),
+            filled(Arr::get($payload, 'fawryFees')) ? $this->formatAmount(Arr::get($payload, 'fawryFees')) : '',
+            filled(Arr::get($payload, 'shippingFees')) ? $this->formatAmount(Arr::get($payload, 'shippingFees')) : '',
+            (string) Arr::get($payload, 'authNumber', ''),
+            (string) Arr::get($payload, 'customerMail', ''),
+            (string) Arr::get($payload, 'customerMobile', ''),
+            (string) config('fawry.secure_key'),
+        ]);
+
+        return hash('sha256', $signaturePayload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $response
+     */
+    protected function paymentUrlFromResponse(array $response): ?string
+    {
+        foreach (['paymentUrl', 'redirectUrl', 'url', 'checkoutUrl'] as $key) {
+            $url = Arr::get($response, $key);
+
+            if (is_string($url) && filter_var($url, FILTER_VALIDATE_URL)) {
+                return $url;
+            }
+        }
+
+        return null;
     }
 }

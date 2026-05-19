@@ -9,6 +9,7 @@ use App\Models\Package;
 use App\Services\Bookings\BookingPaymentService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class PackageBookingController extends Controller
@@ -64,9 +65,14 @@ class PackageBookingController extends Controller
         ]);
     }
 
-    public function result(string $locale, Booking $booking): View
+    public function result(Request $request, string $locale, Booking $booking, BookingPaymentService $bookings): View
     {
         abort_unless($booking->locale === $locale, 404);
+
+        if ($request->filled('orderStatus')) {
+            $bookings->applyFawryReturnResponse($request->query());
+            $booking->refresh();
+        }
 
         return view('packages.booking-result', [
             'booking' => $booking->loadMissing('package'),
