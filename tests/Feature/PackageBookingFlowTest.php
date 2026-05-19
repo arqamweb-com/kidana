@@ -69,7 +69,10 @@ test('fawry checkout redirects to hosted card checkout', function () {
 
     Http::fake([
         'https://example.test/fawry' => Http::response([
-            'paymentUrl' => 'https://atfawry.fawrystaging.com/checkout/abc123',
+            'nextAction' => [
+                'type' => 'THREE_D_SECURE',
+                'redirectUrl' => 'https://atfawry.fawrystaging.com/checkout/abc123',
+            ],
         ]),
     ]);
 
@@ -97,6 +100,57 @@ test('fawry checkout redirects to hosted card checkout', function () {
         && $request['paymentMethod'] === 'CARD'
         && filled($request['returnUrl'])
         && filled($request['orderWebHookUrl']));
+});
+
+test('fawry checkout handles a json string hosted checkout url', function () {
+    config([
+        'fawry.merchant_code' => 'TEST-MERCHANT',
+        'fawry.secure_key' => 'secret',
+        'fawry.endpoint' => 'https://example.test/fawry',
+        'fawry.payment_method' => 'CARD',
+    ]);
+
+    Http::fake([
+        'https://example.test/fawry' => Http::response('"https://atfawry.fawrystaging.com/checkout/json-string"', 200, [
+            'Content-Type' => 'application/json',
+        ]),
+    ]);
+
+    $package = Package::factory()->create([
+        'price' => 3000,
+        'order_action' => PackageOrderAction::FawryPayment,
+    ]);
+
+    $this
+        ->post(route('packages.checkout.store', ['package' => $package->slug]), bookingPayload())
+        ->assertRedirect('https://atfawry.fawrystaging.com/checkout/json-string');
+});
+
+test('fawry checkout does not show a reference page when checkout url is missing', function () {
+    config([
+        'fawry.merchant_code' => 'TEST-MERCHANT',
+        'fawry.secure_key' => 'secret',
+        'fawry.endpoint' => 'https://example.test/fawry',
+        'fawry.payment_method' => 'CARD',
+    ]);
+
+    Http::fake([
+        'https://example.test/fawry' => Http::response([
+            'referenceNumber' => '987654321',
+            'orderStatus' => 'PENDING',
+        ]),
+    ]);
+
+    $package = Package::factory()->create([
+        'price' => 3000,
+        'order_action' => PackageOrderAction::FawryPayment,
+    ]);
+
+    $this
+        ->from(route('packages.checkout', ['package' => $package->slug]))
+        ->post(route('packages.checkout.store', ['package' => $package->slug]), bookingPayload())
+        ->assertRedirect(route('packages.checkout', ['package' => $package->slug]))
+        ->assertSessionHasErrors('payment');
 });
 
 test('fawry webhook marks booking paid and queues confirmation email', function () {
@@ -177,6 +231,7 @@ test('fawry return response can mark booking paid', function () {
 
     $this->get(route('bookings.result', ['booking' => $booking->id, ...$payload]))
         ->assertSuccessful()
+        ->assertSee('Payment successful')
         ->assertSee('99887766');
 
     expect($payment->refresh())

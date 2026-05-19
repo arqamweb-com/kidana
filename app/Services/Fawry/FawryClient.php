@@ -34,6 +34,12 @@ class FawryClient
 
         $json = $response->json();
 
+        if (is_string($json) && filter_var($json, FILTER_VALIDATE_URL)) {
+            return [
+                'paymentUrl' => $json,
+            ];
+        }
+
         if (is_array($json)) {
             return [
                 ...$json,
@@ -42,6 +48,14 @@ class FawryClient
         }
 
         $body = trim($response->body());
+        $decodedBody = json_decode($body, true);
+
+        if (is_string($decodedBody) && filter_var($decodedBody, FILTER_VALIDATE_URL)) {
+            return [
+                'paymentUrl' => $decodedBody,
+                'raw' => $body,
+            ];
+        }
 
         return [
             'paymentUrl' => filter_var($body, FILTER_VALIDATE_URL) ? $body : null,
@@ -161,7 +175,7 @@ class FawryClient
      */
     protected function paymentUrlFromResponse(array $response): ?string
     {
-        foreach (['paymentUrl', 'redirectUrl', 'url', 'checkoutUrl'] as $key) {
+        foreach (['paymentUrl', 'redirectUrl', 'url', 'checkoutUrl', 'nextAction.redirectUrl'] as $key) {
             $url = Arr::get($response, $key);
 
             if (is_string($url) && filter_var($url, FILTER_VALIDATE_URL)) {

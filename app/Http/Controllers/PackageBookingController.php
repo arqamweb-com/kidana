@@ -47,22 +47,13 @@ class PackageBookingController extends Controller
         ]);
     }
 
-    public function startCheckout(StorePackageBookingRequest $request, string $locale, Package $package, BookingPaymentService $bookings): RedirectResponse|View
+    public function startCheckout(StorePackageBookingRequest $request, string $locale, Package $package, BookingPaymentService $bookings): RedirectResponse
     {
         $this->ensureActive($package);
 
         $result = $bookings->createFawryPayment($package, $request->validated(), $locale);
-        $paymentUrl = Arr::get($result['response'], 'paymentUrl');
 
-        if (filled($paymentUrl)) {
-            return redirect()->away((string) $paymentUrl);
-        }
-
-        return view('packages.booking-result', [
-            'booking' => $result['booking']->loadMissing('package'),
-            'payment' => $result['payment'],
-            'status' => 'payment_reference_created',
-        ]);
+        return redirect()->away((string) Arr::get($result['response'], 'paymentUrl'));
     }
 
     public function result(Request $request, string $locale, Booking $booking, BookingPaymentService $bookings): View

@@ -76,6 +76,12 @@ class BookingPaymentService
             'response_payload' => $response,
         ]);
 
+        if (blank(Arr::get($response, 'paymentUrl'))) {
+            throw ValidationException::withMessages([
+                'payment' => __('packages.booking.payment_checkout_url_missing'),
+            ]);
+        }
+
         return [
             'booking' => $booking->refresh(),
             'payment' => $payment->refresh(),
