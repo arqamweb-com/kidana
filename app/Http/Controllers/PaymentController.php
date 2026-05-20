@@ -64,9 +64,12 @@ class PaymentController extends Controller
 
         $booking = $payment->booking;
         $messageKey = $payment->status->value === 'paid' ? 'success' : 'error';
+
         $message = $payment->status->value === 'paid'
-            ? 'تم الدفع بنجاح!'
-            : 'لم يتم الدفع: '.($data['statusDescription'] ?? 'خطأ غير معروف');
+            ? __('payments.fawry.success')
+            : __('payments.fawry.failed', [
+                'reason' => $data['statusDescription'] ?? __('payments.fawry.unknown_error'),
+            ]);
 
         return redirect()
             ->route('bookings.result', [

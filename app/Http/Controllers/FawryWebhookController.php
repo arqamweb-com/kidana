@@ -20,12 +20,6 @@ class FawryWebhookController extends Controller
 
         Log::channel('daily')->info('[Fawry Webhook]', Arr::except($data, ['signature']));
 
-        //        if (! $this->fawry->verifyCallbackSignature($data)) {
-        //            Log::warning('[Fawry Webhook] Invalid signature', Arr::except($data, ['signature']));
-        //
-        //            return response('Unauthorized', 401);
-        //        }
-
         if (! $this->fawry->verifyCallbackSignature($data)) {
             Log::warning('[Fawry Webhook] Invalid signature', Arr::except($data, ['signature']));
 
