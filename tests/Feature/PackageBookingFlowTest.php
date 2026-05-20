@@ -9,7 +9,6 @@ use App\Models\Package;
 use App\Models\Payment;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
@@ -59,21 +58,11 @@ test('custom package request stores a booking', function () {
         ->total_amount->toBe('2500.00');
 });
 
-test('fawry checkout redirects to hosted card checkout', function () {
+test('fawry checkout creates a booking and shows the checkout button page', function () {
     config([
         'fawry.merchant_code' => 'TEST-MERCHANT',
         'fawry.secure_key' => 'secret',
-        'fawry.endpoint' => 'https://example.test/fawry',
-        'fawry.payment_method' => 'CARD',
-    ]);
-
-    Http::fake([
-        'https://example.test/fawry' => Http::response([
-            'nextAction' => [
-                'type' => 'THREE_D_SECURE',
-                'redirectUrl' => 'https://atfawry.fawrystaging.com/checkout/abc123',
-            ],
-        ]),
+        'fawry.mode' => 'sandbox',
     ]);
 
     $package = Package::factory()->create([
@@ -83,62 +72,63 @@ test('fawry checkout redirects to hosted card checkout', function () {
 
     $response = $this->post(route('packages.checkout.store', ['package' => $package->slug]), bookingPayload());
 
-    $response->assertRedirect('https://atfawry.fawrystaging.com/checkout/abc123');
+    $booking = Booking::query()->with('payment')->first();
+    $payment = $booking->payment;
 
-    $payment = Payment::first();
+    $response->assertRedirect(route('payment.checkout', [
+        'booking' => $booking,
+    ]));
 
-    expect($payment)
+    expect($booking)
+        ->status->toBe(BookingStatus::AwaitingPayment)
+        ->type->toBe(PackageOrderAction::FawryPayment)
+        ->total_amount->toBe('3000.00')
+        ->and($payment)
         ->not->toBeNull()
         ->status->toBe(PaymentStatus::Pending)
         ->amount->toBe('3000.00')
-        ->fawry_reference_number->toBeNull()
-        ->payment_method->toBe('CARD');
+        ->payment_method->toBe('FawryPayCheckoutButton');
 
-    Http::assertSent(fn ($request): bool => $request['merchantCode'] === 'TEST-MERCHANT'
-        && $request['merchantRefNum'] === $payment->merchant_ref_number
-        && $request['amount'] === '3000.00'
-        && $request['paymentMethod'] === 'CARD'
-        && filled($request['returnUrl'])
-        && filled($request['orderWebHookUrl']));
+    $this->get(route('payment.checkout', ['booking' => $booking]))
+        ->assertSuccessful()
+        ->assertSee('fawrypay-payments.js', false)
+        ->assertSee('FawryPay.checkout', false)
+        ->assertSee($payment->merchant_ref_number);
+
+    $payload = $payment->refresh()->request_payload;
+
+    expect($payload)
+        ->merchantCode->toBe('TEST-MERCHANT')
+        ->merchantRefNum->toBe($payment->merchant_ref_number)
+        ->customerMobile->toBe('01012345678')
+        ->customerEmail->toBe('ahmed@example.com')
+        ->customerProfileId->toBe((string) $booking->id)
+        ->orderWebHookUrl->toBe(route('payment.webhook'))
+        ->returnUrl->toBe(route('payment.callback'))
+        ->and($payload['chargeItems'][0])
+        ->itemId->toBe((string) $package->id)
+        ->price->toEqual(3000.0)
+        ->quantity->toBe(1);
+
+    expect($payload['signature'])->toBe(fawryCheckoutSignature([
+        'merchantCode' => 'TEST-MERCHANT',
+        'merchantRefNum' => $payment->merchant_ref_number,
+        'customerProfileId' => (string) $booking->id,
+        'returnUrl' => route('payment.callback'),
+        'items' => [
+            [
+                'id' => (string) $package->id,
+                'quantity' => 1,
+                'price' => 3000,
+            ],
+        ],
+    ], 'secret'));
 });
 
-test('fawry checkout handles a json string hosted checkout url', function () {
+test('fawry checkout requires configuration before creating a booking', function () {
     config([
-        'fawry.merchant_code' => 'TEST-MERCHANT',
-        'fawry.secure_key' => 'secret',
-        'fawry.endpoint' => 'https://example.test/fawry',
-        'fawry.payment_method' => 'CARD',
-    ]);
-
-    Http::fake([
-        'https://example.test/fawry' => Http::response('"https://atfawry.fawrystaging.com/checkout/json-string"', 200, [
-            'Content-Type' => 'application/json',
-        ]),
-    ]);
-
-    $package = Package::factory()->create([
-        'price' => 3000,
-        'order_action' => PackageOrderAction::FawryPayment,
-    ]);
-
-    $this
-        ->post(route('packages.checkout.store', ['package' => $package->slug]), bookingPayload())
-        ->assertRedirect('https://atfawry.fawrystaging.com/checkout/json-string');
-});
-
-test('fawry checkout does not show a reference page when checkout url is missing', function () {
-    config([
-        'fawry.merchant_code' => 'TEST-MERCHANT',
-        'fawry.secure_key' => 'secret',
-        'fawry.endpoint' => 'https://example.test/fawry',
-        'fawry.payment_method' => 'CARD',
-    ]);
-
-    Http::fake([
-        'https://example.test/fawry' => Http::response([
-            'referenceNumber' => '987654321',
-            'orderStatus' => 'PENDING',
-        ]),
+        'fawry.merchant_code' => null,
+        'fawry.secure_key' => null,
     ]);
 
     $package = Package::factory()->create([
@@ -151,6 +141,9 @@ test('fawry checkout does not show a reference page when checkout url is missing
         ->post(route('packages.checkout.store', ['package' => $package->slug]), bookingPayload())
         ->assertRedirect(route('packages.checkout', ['package' => $package->slug]))
         ->assertSessionHasErrors('payment');
+
+    expect(Booking::count())->toBe(0)
+        ->and(Payment::count())->toBe(0);
 });
 
 test('fawry webhook marks booking paid and queues confirmation email', function () {
@@ -159,32 +152,13 @@ test('fawry webhook marks booking paid and queues confirmation email', function 
     ]);
     Mail::fake();
 
-    $booking = Booking::factory()->create([
-        'status' => BookingStatus::AwaitingPayment,
-        'total_amount' => 3000,
-        'currency' => 'EGP',
-    ]);
-    $payment = Payment::factory()->create([
-        'booking_id' => $booking->id,
-        'merchant_ref_number' => 'BK-1-20260519190000',
-        'status' => PaymentStatus::Pending,
-        'amount' => 3000,
-        'currency' => 'EGP',
-    ]);
-    $payload = [
-        'fawryRefNumber' => '1122334455',
-        'merchantRefNum' => $payment->merchant_ref_number,
-        'paymentAmount' => '3000.00',
-        'orderAmount' => '3000.00',
-        'orderStatus' => 'PAID',
-        'paymentMethod' => 'CARD',
-        'paymentReferenceNumber' => '1122334455',
-    ];
-    $payload['messageSignature'] = fawryNotificationSignature($payload, 'secret');
+    [$booking, $payment] = paidTestBooking();
+    $payload = fawryPaidPayload($booking, $payment);
+    $payload['signature'] = fawryReturnSignature($payload, 'secret');
 
-    $this->postJson(route('payments.fawry.webhook'), $payload)
+    $this->post(route('payment.webhook'), $payload)
         ->assertSuccessful()
-        ->assertJson(['received' => true]);
+        ->assertContent('');
 
     expect($payment->refresh())
         ->status->toBe(PaymentStatus::Paid)
@@ -197,46 +171,22 @@ test('fawry webhook marks booking paid and queues confirmation email', function 
     Mail::assertQueued(BookingPaymentSucceeded::class);
 });
 
-test('fawry return response can mark booking paid', function () {
+test('fawry callback marks booking paid and redirects to booking result', function () {
     config([
         'fawry.secure_key' => 'secret',
     ]);
     Mail::fake();
 
-    $booking = Booking::factory()->create([
-        'status' => BookingStatus::AwaitingPayment,
-        'total_amount' => 3000,
-        'currency' => 'EGP',
-    ]);
-    $payment = Payment::factory()->create([
-        'booking_id' => $booking->id,
-        'merchant_ref_number' => 'BK-2-20260520100000',
-        'status' => PaymentStatus::Pending,
-        'amount' => 3000,
-        'currency' => 'EGP',
-        'payment_method' => 'CARD',
-    ]);
-    $payload = [
-        'referenceNumber' => '99887766',
-        'merchantRefNumber' => $payment->merchant_ref_number,
-        'paymentAmount' => '3000.00',
-        'orderAmount' => '3000.00',
-        'orderStatus' => 'PAID',
-        'paymentMethod' => 'CARD',
-        'fawryFees' => '0.00',
-        'customerMail' => $booking->customer_email,
-        'customerMobile' => $booking->customer_mobile,
-    ];
+    [$booking, $payment] = paidTestBooking();
+    $payload = fawryPaidPayload($booking, $payment);
     $payload['signature'] = fawryReturnSignature($payload, 'secret');
 
-    $this->get(route('bookings.result', ['booking' => $booking->id, ...$payload]))
-        ->assertSuccessful()
-        ->assertSee('Payment successful')
-        ->assertSee('99887766');
+    $this->get(route('payment.callback', $payload))
+        ->assertRedirect(route('bookings.result', ['booking' => $booking]));
 
     expect($payment->refresh())
         ->status->toBe(PaymentStatus::Paid)
-        ->fawry_reference_number->toBe('99887766')
+        ->fawry_reference_number->toBe('1122334455')
         ->and($booking->refresh())
         ->status->toBe(BookingStatus::Paid)
         ->paid_at->not->toBeNull();
@@ -260,20 +210,64 @@ function bookingPayload(): array
 }
 
 /**
- * @param  array<string, mixed>  $payload
+ * @return array{0: Booking, 1: Payment}
  */
-function fawryNotificationSignature(array $payload, string $secureKey): string
+function paidTestBooking(): array
 {
-    return hash('sha256', implode('', [
-        $payload['fawryRefNumber'],
-        $payload['merchantRefNum'],
-        $payload['paymentAmount'],
-        $payload['orderAmount'],
-        $payload['orderStatus'],
-        $payload['paymentMethod'],
-        $payload['paymentReferenceNumber'],
-        $secureKey,
-    ]));
+    $booking = Booking::factory()->create([
+        'status' => BookingStatus::AwaitingPayment,
+        'type' => PackageOrderAction::FawryPayment,
+        'total_amount' => 3000,
+        'currency' => 'EGP',
+    ]);
+    $payment = Payment::factory()->create([
+        'booking_id' => $booking->id,
+        'merchant_ref_number' => 'BK-1-20260519190000',
+        'status' => PaymentStatus::Pending,
+        'amount' => 3000,
+        'currency' => 'EGP',
+        'payment_method' => 'FawryPayCheckoutButton',
+    ]);
+
+    return [$booking, $payment];
+}
+
+/**
+ * @return array<string, string>
+ */
+function fawryPaidPayload(Booking $booking, Payment $payment): array
+{
+    return [
+        'referenceNumber' => '1122334455',
+        'merchantRefNumber' => $payment->merchant_ref_number,
+        'paymentAmount' => '3000.00',
+        'orderAmount' => '3000.00',
+        'orderStatus' => 'PAID',
+        'paymentMethod' => 'CARD',
+        'fawryFees' => '0.00',
+        'customerMail' => $booking->customer_email,
+        'customerMobile' => $booking->customer_mobile,
+    ];
+}
+
+/**
+ * @param  array{merchantCode: string, merchantRefNum: string, customerProfileId: string, returnUrl: string, items: array<int, array{id: string, quantity: int, price: int|float}>}  $payload
+ */
+function fawryCheckoutSignature(array $payload, string $secureKey): string
+{
+    $items = $payload['items'];
+    usort($items, fn (array $a, array $b): int => strcmp((string) $a['id'], (string) $b['id']));
+
+    $signaturePayload = $payload['merchantCode']
+        .$payload['merchantRefNum']
+        .$payload['customerProfileId']
+        .$payload['returnUrl'];
+
+    foreach ($items as $item) {
+        $signaturePayload .= $item['id'].$item['quantity'].number_format((float) $item['price'], 2, '.', '');
+    }
+
+    return hash('sha256', $signaturePayload.$secureKey);
 }
 
 /**

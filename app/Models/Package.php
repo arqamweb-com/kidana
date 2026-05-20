@@ -14,8 +14,8 @@ use Spatie\Translatable\HasTranslations;
 
 class Package extends Model
 {
-    use HasFactory;
     use HasAutoSlug;
+    use HasFactory;
     use HasTranslations;
 
     protected $fillable = [
@@ -64,7 +64,7 @@ class Package extends Model
             'destination_id' => 'integer',
             'start_date' => 'date',
             'end_date' => 'date',
-            'price' => 'decimal:2',
+            'price' => 'integer',
             'order_action' => PackageOrderAction::class,
             'included_items' => 'array',
             'excluded_items' => 'array',

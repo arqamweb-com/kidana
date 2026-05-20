@@ -110,6 +110,7 @@ return [
         'pay_with_fawry' => 'Continuer vers le paiement Fawry',
         'payment_not_configured' => 'Le paiement Fawry n’est pas encore configuré. Veuillez contacter le support.',
         'payment_checkout_url_missing' => 'Fawry n’a pas renvoyé de page de paiement par carte. Veuillez contacter le support.',
+        'payment_checkout_url_missing_with_reason' => 'Fawry n’a pas renvoyé de page de paiement par carte : :reason',
         'result_title' => 'Statut de réservation',
         'result_meta_description' => 'Le statut de votre réservation.',
         'result_eyebrow' => 'Réservation',

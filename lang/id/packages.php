@@ -110,6 +110,7 @@ return [
         'pay_with_fawry' => 'Lanjutkan ke Pembayaran Fawry',
         'payment_not_configured' => 'Pembayaran Fawry belum dikonfigurasi. Silakan hubungi dukungan.',
         'payment_checkout_url_missing' => 'Fawry tidak mengembalikan halaman pembayaran kartu. Silakan hubungi dukungan.',
+        'payment_checkout_url_missing_with_reason' => 'Fawry tidak mengembalikan halaman pembayaran kartu: :reason',
         'result_title' => 'Status Pemesanan',
         'result_meta_description' => 'Status pemesanan Anda.',
         'result_eyebrow' => 'Pemesanan',

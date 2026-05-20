@@ -579,7 +579,7 @@
                 @include('sections.faq', ['faqs' => $package->faqs])
             </div>
         </section>
-        <section class="relative py-28 overflow-hidden"><img src="/assets/kaaba-umrah-BTvk3hmK.jpg" alt=""
+        <section class="relative py-28 overflow-hidden"><img src="#" alt=""
                                                              class="absolute inset-0 w-full h-full object-cover">
             <div
                 class="absolute inset-0 bg-gradient-to-b from-[hsl(var(--hero-overlay))]/90 to-[hsl(var(--secondary))]/90"></div>

@@ -31,7 +31,7 @@ class PackageFactory extends Factory
             ],
             'destination_id' => Destination::factory(),
             'location_label' => fake()->city(),
-            'price' => fake()->randomFloat(2, 1500, 12000),
+            'price' => fake()->numberBetween(1500, 12000),
             'order_action' => PackageOrderAction::CustomForm,
             'start_date' => now()->addDays(fake()->numberBetween(5, 20))->startOfDay(),
             'end_date' => now()->addDays(fake()->numberBetween(21, 35))->startOfDay(),

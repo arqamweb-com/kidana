@@ -110,6 +110,7 @@ return [
         'pay_with_fawry' => 'Continue to Fawry Payment',
         'payment_not_configured' => 'Fawry payment is not configured yet. Please contact support.',
         'payment_checkout_url_missing' => 'Fawry did not return a card payment page. Please contact support.',
+        'payment_checkout_url_missing_with_reason' => 'Fawry did not return a card payment page: :reason',
         'result_title' => 'Booking Status',
         'result_meta_description' => 'Your booking status.',
         'result_eyebrow' => 'Booking',

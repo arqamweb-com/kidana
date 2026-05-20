@@ -110,6 +110,7 @@ return [
         'pay_with_fawry' => 'المتابعة للدفع عبر فوري',
         'payment_not_configured' => 'الدفع عبر فوري غير مفعل حالياً. برجاء التواصل مع الدعم.',
         'payment_checkout_url_missing' => 'لم ترسل فوري رابط صفحة الدفع بالكارت. برجاء التواصل مع الدعم.',
+        'payment_checkout_url_missing_with_reason' => 'لم ترسل فوري رابط صفحة الدفع بالكارت: :reason',
         'result_title' => 'حالة الحجز',
         'result_meta_description' => 'حالة حجزك.',
         'result_eyebrow' => 'الحجز',

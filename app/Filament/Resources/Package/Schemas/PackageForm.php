@@ -2,15 +2,14 @@
 
 namespace App\Filament\Resources\Package\Schemas;
 
+use App\Enum\PackageOrderAction;
 use App\Filament\Support\FileUploadStorage;
 use App\Filament\Support\SlugGenerator;
-use App\Enum\PackageOrderAction;
 use App\Models\Faq;
 use App\Models\Testimonial;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
@@ -18,8 +17,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
-use Filament\Support\Icons\Heroicon;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Str;
 
 class PackageForm
@@ -67,7 +66,7 @@ class PackageForm
                                 ->maxLength(255),
                             TextInput::make('price')
                                 ->required()
-                                // ->numeric()
+                                ->integer()
                                 ->minValue(0),
                             Select::make('order_action')
                                 ->label('Order button action')
@@ -132,12 +131,11 @@ class PackageForm
                                         ->columnSpanFull(),
                                 ])
                                 ->reorderable()
-                                ->itemLabel(fn($state) => $state['title'] ?? 'Day')
+                                ->itemLabel(fn ($state) => $state['title'] ?? 'Day')
                                 ->columnSpanFull(),
                         ])
                         ->columns(2)
                         ->collapsible(),
-
 
                     Section::make('What’s Included / Not Included')
                         ->schema([
@@ -159,7 +157,7 @@ class PackageForm
                                 ->default([])
                                 ->reorderable()
                                 ->collapsible()
-                                ->itemLabel(fn($state) => $state['title'] ?? 'Included item')
+                                ->itemLabel(fn ($state) => $state['title'] ?? 'Included item')
                                 ->columnSpanFull(),
 
                             Repeater::make('excluded_items')
@@ -180,12 +178,11 @@ class PackageForm
                                 ->default([])
                                 ->reorderable()
                                 ->collapsible()
-                                ->itemLabel(fn($state) => $state['title'] ?? 'Excluded item')
+                                ->itemLabel(fn ($state) => $state['title'] ?? 'Excluded item')
                                 ->columnSpanFull(),
                         ])
                         ->columns(2)
                         ->collapsible(),
-
 
                     Section::make('Package Highlights')
                         ->schema([
@@ -206,11 +203,10 @@ class PackageForm
                                 ->default([])
                                 ->reorderable()
                                 ->collapsible()
-                                ->itemLabel(fn($state) => $state['title'] ?? 'Highlight')
+                                ->itemLabel(fn ($state) => $state['title'] ?? 'Highlight')
                                 ->columnSpanFull(),
                         ])
                         ->collapsible(),
-
 
                     Section::make('FAQs & Testimonials')
                         ->schema([
@@ -218,7 +214,7 @@ class PackageForm
                                 ->label('FAQs')
                                 ->multiple()
                                 ->relationship(titleAttribute: 'title')
-                                ->getOptionLabelFromRecordUsing(fn(Faq $record): string => $record->title)
+                                ->getOptionLabelFromRecordUsing(fn (Faq $record): string => $record->title)
                                 ->searchable()
                                 ->preload()
                                 ->columnSpanFull(),
@@ -226,7 +222,7 @@ class PackageForm
                                 ->label('Testimonials')
                                 ->multiple()
                                 ->relationship(titleAttribute: 'name')
-                                ->getOptionLabelFromRecordUsing(fn(Testimonial $record): string => $record->name)
+                                ->getOptionLabelFromRecordUsing(fn (Testimonial $record): string => $record->name)
                                 ->searchable()
                                 ->preload()
                                 ->columnSpanFull(),
@@ -266,7 +262,6 @@ class PackageForm
                 ])->columnSpan(1),
             ])->columns(3);
 
-
     }
 
     /**
@@ -275,9 +270,9 @@ class PackageForm
     protected static function IconOptions(): array
     {
         return collect(Heroicon::cases())
-            ->filter(fn(Heroicon $icon): bool => str_starts_with($icon->value, 'o-'))
-            ->mapWithKeys(fn(Heroicon $icon): array => [
-                "heroicon-{$icon->value}" => (string)Str::of($icon->value)
+            ->filter(fn (Heroicon $icon): bool => str_starts_with($icon->value, 'o-'))
+            ->mapWithKeys(fn (Heroicon $icon): array => [
+                "heroicon-{$icon->value}" => (string) Str::of($icon->value)
                     ->after('o-')
                     ->replace('-', ' ')
                     ->title(),
@@ -288,26 +283,26 @@ class PackageForm
     /**
      * @return array<string, string>
      */
-//    public static function includedIconOptions(): array
-//    {
-//        return [
-//            'heroicon-o-check' => 'Check',
-//            'heroicon-o-bed-double' => 'Hotel',
-//            'heroicon-o-utensils' => 'Meals',
-//            'heroicon-o-user-check' => 'Guide',
-//            'heroicon-o-compass' => 'Transport',
-//        ];
-//    }
+    //    public static function includedIconOptions(): array
+    //    {
+    //        return [
+    //            'heroicon-o-check' => 'Check',
+    //            'heroicon-o-bed-double' => 'Hotel',
+    //            'heroicon-o-utensils' => 'Meals',
+    //            'heroicon-o-user-check' => 'Guide',
+    //            'heroicon-o-compass' => 'Transport',
+    //        ];
+    //    }
 
     /**
      * @return array<string, string>
      */
-//    public static function excludedIconOptions(): array
-//    {
-//        return [
-//            'heroicon-o-x-mark' => 'Not Included',
-//            'heroicon-o-plane' => 'Flights',
-//            'heroicon-o-shopping-bag' => 'Shopping',
-//        ];
-//    }
+    //    public static function excludedIconOptions(): array
+    //    {
+    //        return [
+    //            'heroicon-o-x-mark' => 'Not Included',
+    //            'heroicon-o-plane' => 'Flights',
+    //            'heroicon-o-shopping-bag' => 'Shopping',
+    //        ];
+    //    }
 }

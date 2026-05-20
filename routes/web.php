@@ -1,19 +1,30 @@
 <?php
 
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\DestinationIndexController;
-use App\Http\Controllers\PackageController;
+use App\Http\Controllers\FawryWebhookController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PackageBookingController;
-use App\Http\Controllers\PackageShowController;
+use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageSearchController;
+use App\Http\Controllers\PackageShowController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SitemapController;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
-Route::redirect('/', '/' . config('app.locale'));
+Route::redirect('/', '/'.config('app.locale'));
+
+Route::post('/payment/webhook/fawry', [FawryWebhookController::class, 'handle'])
+    ->name('payment.webhook')
+    ->withoutMiddleware([PreventRequestForgery::class, VerifyCsrfToken::class]);
+
+Route::get('/payment/callback', [PaymentController::class, 'callback'])
+    ->name('payment.callback');
 
 Route::prefix('{locale}')
     ->whereIn('locale', array_keys(config('locales.supported')))
@@ -38,6 +49,7 @@ Route::prefix('{locale}')
         Route::post('/packages/{package:slug}/request', [PackageBookingController::class, 'storeRequest'])->name('packages.request.store');
         Route::get('/packages/{package:slug}/checkout', [PackageBookingController::class, 'checkoutForm'])->name('packages.checkout');
         Route::post('/packages/{package:slug}/checkout', [PackageBookingController::class, 'startCheckout'])->name('packages.checkout.store');
+        Route::get('/bookings/{booking}/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
         Route::get('/bookings/{booking}/result', [PackageBookingController::class, 'result'])->name('bookings.result');
 
         Route::view('/umrah-plus', 'pages.umrah-plus')->name('umrah-plus');

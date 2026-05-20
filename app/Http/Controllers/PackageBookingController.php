@@ -6,11 +6,11 @@ use App\Enum\PackageOrderAction;
 use App\Http\Requests\StorePackageBookingRequest;
 use App\Models\Booking;
 use App\Models\Package;
-use App\Services\Bookings\BookingPaymentService;
+use App\Services\Bookings\BookingService;
+use App\Services\FawryService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
+use Illuminate\Validation\ValidationException;
 
 class PackageBookingController extends Controller
 {
@@ -24,7 +24,7 @@ class PackageBookingController extends Controller
         ]);
     }
 
-    public function storeRequest(StorePackageBookingRequest $request, string $locale, Package $package, BookingPaymentService $bookings): View
+    public function storeRequest(StorePackageBookingRequest $request, string $locale, Package $package, BookingService $bookings): View
     {
         $this->ensureActive($package);
 
@@ -47,23 +47,27 @@ class PackageBookingController extends Controller
         ]);
     }
 
-    public function startCheckout(StorePackageBookingRequest $request, string $locale, Package $package, BookingPaymentService $bookings): RedirectResponse
+    public function startCheckout(StorePackageBookingRequest $request, string $locale, Package $package, BookingService $bookings, FawryService $fawry): RedirectResponse
     {
         $this->ensureActive($package);
 
-        $result = $bookings->createFawryPayment($package, $request->validated(), $locale);
+        if (! $fawry->isConfigured()) {
+            throw ValidationException::withMessages([
+                'payment' => __('packages.booking.payment_not_configured'),
+            ]);
+        }
 
-        return redirect()->away((string) Arr::get($result['response'], 'paymentUrl'));
+        $booking = $bookings->createFawryBooking($package, $request->validated(), $locale);
+
+        return redirect()->route('payment.checkout', [
+            'locale' => $locale,
+            'booking' => $booking,
+        ]);
     }
 
-    public function result(Request $request, string $locale, Booking $booking, BookingPaymentService $bookings): View
+    public function result(string $locale, Booking $booking): View
     {
         abort_unless($booking->locale === $locale, 404);
-
-        if ($request->filled('orderStatus')) {
-            $bookings->applyFawryReturnResponse($request->query());
-            $booking->refresh();
-        }
 
         return view('packages.booking-result', [
             'booking' => $booking->loadMissing('package'),

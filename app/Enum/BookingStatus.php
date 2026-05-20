@@ -10,6 +10,8 @@ enum BookingStatus: string
     case Failed = 'failed';
     case Expired = 'expired';
     case Cancelled = 'cancelled';
+    case Refunded = 'refunded';
+    case PartialRefunded = 'partial_refunded';
 
     /**
      * @return array<string, string>
@@ -23,6 +25,8 @@ enum BookingStatus: string
             self::Failed->value => 'Failed',
             self::Expired->value => 'Expired',
             self::Cancelled->value => 'Cancelled',
+            self::Refunded->value => 'Refunded',
+            self::PartialRefunded->value => 'Partial refunded',
         ];
     }
 
@@ -32,6 +36,7 @@ enum BookingStatus: string
             self::Paid => 'success',
             self::AwaitingPayment => 'warning',
             self::Failed, self::Expired, self::Cancelled => 'danger',
+            self::Refunded, self::PartialRefunded => 'info',
             self::Pending => 'gray',
         };
     }
