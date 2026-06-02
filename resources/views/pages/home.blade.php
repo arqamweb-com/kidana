@@ -316,7 +316,7 @@
                 <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('home.packages.title') }}</h2>
             </div>
 
-            @include('sections.packages-grid');
+            @include('sections.packages-grid')
 
             <div class="text-center mt-14">
                 <button
