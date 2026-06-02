@@ -119,6 +119,31 @@ class BookingService
         return $payment;
     }
 
+    public function syncBookingFromPayment(Payment $payment): void
+    {
+        $payment->loadMissing('booking');
+
+        $status = $this->bookingStatusFromPayment($payment->status);
+        $paidAt = $payment->status === PaymentStatus::Paid
+            ? ($payment->paid_at ?? now())
+            : $payment->booking->paid_at;
+
+        DB::transaction(function () use ($payment, $status, $paidAt): void {
+            if ($payment->status === PaymentStatus::Paid && $payment->paid_at === null) {
+                $payment->update(['paid_at' => $paidAt]);
+            }
+
+            $payment->booking->update([
+                'status' => $status,
+                'paid_at' => $paidAt,
+            ]);
+        });
+
+        if ($payment->status === PaymentStatus::Paid) {
+            $this->sendPaymentSuccessEmail($payment->booking);
+        }
+    }
+
     protected function sendPaymentSuccessEmail(Booking $booking): void
     {
         if ($booking->payment_success_email_sent_at !== null) {
