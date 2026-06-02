@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Destination;
 use App\Models\Service;
 use App\Services\FawryService;
 use Illuminate\Support\Facades\Schema;
@@ -38,6 +39,29 @@ class AppServiceProvider extends ServiceProvider
                 ->active()
                 ->orderBy('sort_order')
                 ->orderBy("name->{$locale}")
+                ->get(['id', 'name', 'slug']));
+        });
+
+        View::composer('layout.footer', function ($view): void {
+            if (! Schema::hasTable('services') || ! Schema::hasTable('destinations')) {
+                $view->with('footerServices', collect());
+                $view->with('footerDestinations', collect());
+
+                return;
+            }
+
+            $locale = app()->getLocale();
+
+            $view->with('footerServices', Service::query()
+                ->active()
+                ->orderBy('sort_order')
+                ->limit(5)
+                ->get(['id', 'name', 'slug']));
+
+            $view->with('footerDestinations', Destination::query()
+                ->active()
+                ->orderBy('sort_order')
+                ->limit(5)
                 ->get(['id', 'name', 'slug']));
         });
     }

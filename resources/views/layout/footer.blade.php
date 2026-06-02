@@ -8,21 +8,21 @@
             <div>
                 <h4 class="font-bold text-primary-foreground mb-5 text-sm tracking-wide uppercase">{{ __('footer.quick_links') }}
                 </h4>
-                <div class="flex flex-col gap-3 text-sm"><a href="{{ route('home') }}"
-                        class="hover:text-primary transition-colors duration-300">{{ __('nav.home') }}</a><a
-                        href="{{ route('services.index') }}"
-                        class="hover:text-primary transition-colors duration-300">{{ __('nav.services') }}</a><a
-                        href="{{ route('packages') }}"
-                        class="hover:text-primary transition-colors duration-300">{{ __('nav.packages') }}</a><a href="{{ route('about') }}"
-                        class="hover:text-primary transition-colors duration-300">{{ __('nav.about') }}</a><a href="{{ route('contact') }}"
-                        class="hover:text-primary transition-colors duration-300">{{ __('nav.contact') }}</a></div>
+                <div class="flex flex-col gap-3 text-sm">
+                    <a href="{{ route('home') }}" class="hover:text-primary transition-colors duration-300">{{ __('nav.home') }}</a>
+                    <a href="{{ route('services.index') }}" class="hover:text-primary transition-colors duration-300">{{ __('nav.services') }}</a>
+                    <a href="{{ route('packages') }}" class="hover:text-primary transition-colors duration-300">{{ __('nav.packages') }}</a>
+                    <a href="{{ route('about') }}" class="hover:text-primary transition-colors duration-300">{{ __('nav.about') }}</a>
+                    <a href="{{ route('contact') }}" class="hover:text-primary transition-colors duration-300">{{ __('nav.contact') }}</a>
+                </div>
             </div>
             <div>
                 <h4 class="font-bold text-primary-foreground mb-5 text-sm tracking-wide uppercase">{{ __('footer.services.title') }}
                 </h4>
                 <div class="flex flex-col gap-3 text-sm">
-                    @foreach (trans('footer.services.items') as $service)
-                        <span>{{ $service }}</span>
+                    @foreach ($footerServices as $service)
+                        <a href="{{ route('services.show', ['service' => $service->slug]) }}"
+                           class="hover:text-primary transition-colors duration-300">{{ $service->name }}</a>
                     @endforeach
                 </div>
             </div>
@@ -30,8 +30,9 @@
                 <h4 class="font-bold text-primary-foreground mb-5 text-sm tracking-wide uppercase">
                     {{ __('footer.destinations.title') }}</h4>
                 <div class="flex flex-col gap-3 text-sm">
-                    @foreach (trans('footer.destinations.items') as $destination)
-                        <span>{{ $destination }}</span>
+                    @foreach ($footerDestinations as $destination)
+                        <a href="{{ route('destinations.show', ['destination' => $destination->slug]) }}"
+                           class="hover:text-primary transition-colors duration-300">{{ $destination->name }}</a>
                     @endforeach
                 </div>
             </div>
@@ -66,14 +67,14 @@
         </div>
         <div class="border-t pt-10 text-center text-sm" style="border-top-color: #ffffff1a">
             <div class="mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs tracking-wide">
-                <a class="hover:text-primary transition-colors duration-300" href="{{ route('terms-and-conditions') }}">Terms
-                    &amp; Conditions</a>
+                <a class="hover:text-primary transition-colors duration-300"
+                   href="{{ route('terms-and-conditions') }}">{{ __('nav.terms_and_conditions') }}</a>
                 <span class="text-primary-foreground/30">|</span>
-                <a class="hover:text-primary transition-colors duration-300" href="{{ route('privacy-policy') }}">Privacy
-                    Policy</a>
+                <a class="hover:text-primary transition-colors duration-300"
+                   href="{{ route('privacy-policy') }}">{{ __('nav.privacy_policy') }}</a>
                 <span class="text-primary-foreground/30">|</span>
-                <a class="hover:text-primary transition-colors duration-300" href="{{ route('refund-policy') }}">Refund
-                    Policy</a>
+                <a class="hover:text-primary transition-colors duration-300"
+                   href="{{ route('refund-policy') }}">{{ __('nav.refund_policy') }}</a>
             </div>
             <div
                 class="mb-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs tracking-[0.15em] uppercase text-primary-foreground/60">
