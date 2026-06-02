@@ -54,7 +54,7 @@ test('editor can access content resources but not users resource', function () {
         ->and(TestimonialResource::canAccess())->toBeTrue();
 });
 
-test('admin dashboard renders travel operations widget', function () {
+test('admin dashboard renders business and content widgets', function () {
     $admin = User::factory()->create([
         'role' => Role::Admin,
     ]);
@@ -64,6 +64,6 @@ test('admin dashboard renders travel operations widget', function () {
     $this->actingAs($admin)
         ->get('/admin')
         ->assertSuccessful()
-        ->assertSee('Travel operations overview')
-        ->assertSee('Active packages');
+        ->assertSee('Business overview')
+        ->assertSee('Content readiness');
 });

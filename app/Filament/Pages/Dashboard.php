@@ -2,7 +2,8 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\TravelOperationsOverview;
+use App\Filament\Widgets\BusinessOverviewWidget;
+use App\Filament\Widgets\ContentReadinessWidget;
 use Filament\Pages\Dashboard as PageDashboard;
 
 class Dashboard extends PageDashboard
@@ -10,7 +11,8 @@ class Dashboard extends PageDashboard
     public function getWidgets(): array
     {
         return [
-            TravelOperationsOverview::class,
+            BusinessOverviewWidget::class,
+            ContentReadinessWidget::class,
         ];
     }
 
