@@ -65,6 +65,16 @@
             </div>
         </div>
         <div class="border-t pt-10 text-center text-sm" style="border-top-color: #ffffff1a">
+            <div class="mb-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs tracking-wide">
+                <a class="hover:text-primary transition-colors duration-300" href="{{ route('terms-and-conditions') }}">Terms
+                    &amp; Conditions</a>
+                <span class="text-primary-foreground/30">|</span>
+                <a class="hover:text-primary transition-colors duration-300" href="{{ route('privacy-policy') }}">Privacy
+                    Policy</a>
+                <span class="text-primary-foreground/30">|</span>
+                <a class="hover:text-primary transition-colors duration-300" href="{{ route('refund-policy') }}">Refund
+                    Policy</a>
+            </div>
             <div
                 class="mb-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs tracking-[0.15em] uppercase text-primary-foreground/60">
                 <span><span class="text-primary-foreground/80 font-semibold">{{ __('footer.tourism_license') }}</span>

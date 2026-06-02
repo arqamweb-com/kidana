@@ -11,4 +11,7 @@ return [
     'contact' => 'Kontak',
     'visit_egypt' => 'Kunjungi Mesir',
     'book_now' => 'Pesan Sekarang',
+    'terms_and_conditions' => 'Syarat & Ketentuan',
+    'privacy_policy' => 'Kebijakan Privasi',
+    'refund_policy' => 'Kebijakan Pengembalian Dana',
 ];

@@ -82,7 +82,7 @@ class ContentReadinessWidget extends StatsOverviewWidget
         $total = $testimonials + $faqs;
 
         return Stat::make('Homepage content', Number::format($total))
-            ->description("{$testimonials} testimonials · {$faqs} FAQs tagged home")
+            ->description("{$testimonials} testimonials · {$faqs} FAQs")
             ->descriptionIcon(Heroicon::OutlinedSparkles)
             ->color($total > 0 ? 'primary' : 'gray');
     }

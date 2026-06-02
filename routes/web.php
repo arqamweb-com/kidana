@@ -53,4 +53,8 @@ Route::prefix('{locale}')
         Route::get('/bookings/{booking}/result', [PackageBookingController::class, 'result'])->name('bookings.result');
 
         Route::view('/umrah-plus', 'pages.umrah-plus')->name('umrah-plus');
+
+        Route::view('/terms-and-conditions', 'pages.terms-and-conditions')->name('terms-and-conditions');
+        Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy-policy');
+        Route::view('/refund-policy', 'pages.refund-policy')->name('refund-policy');
     });
