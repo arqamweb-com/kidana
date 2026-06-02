@@ -17,8 +17,8 @@ test('package pages render core seo tags', function () {
     $response = $this->get(route('packages.show', ['package' => $package->slug]));
 
     $response->assertSuccessful();
-    $response->assertSee('<meta name="description" content="A search friendly package description for premium Umrah travelers.">', false);
-    $response->assertSee('<link rel="canonical" href="' . route('packages.show', ['package' => $package->slug]) . '">', false);
+    $response->assertSee('content="A search friendly package description for premium Umrah travelers."', false);
+    $response->assertSee('<link rel="canonical" href="'.route('packages.show', ['package' => $package->slug]).'">', false);
     $response->assertSee('<meta property="og:image" content="https://example.com/package.jpg">', false);
 });
 

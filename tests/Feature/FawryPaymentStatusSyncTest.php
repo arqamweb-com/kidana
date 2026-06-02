@@ -7,6 +7,7 @@ use App\Mail\BookingPaymentSucceeded;
 use App\Models\Booking;
 use App\Models\Payment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
@@ -102,6 +103,42 @@ test('unknown inquiry status keeps payment pending', function () {
         ->and($booking->refresh())
         ->status->toBe(BookingStatus::AwaitingPayment)
         ->paid_at->toBeNull();
+});
+
+test('payments older than max-age are skipped', function () {
+    Http::fake();
+
+    [$booking, $payment] = pendingFawryPayment();
+
+    DB::table('payments')
+        ->where('id', $payment->id)
+        ->update(['created_at' => now()->subHours(72)]);
+
+    $this->artisan('fawry:sync-payments --max-age=48')->assertSuccessful();
+
+    Http::assertNothingSent();
+    expect($payment->refresh()->status)->toBe(PaymentStatus::Pending);
+});
+
+test('sync stops after reaching the limit', function () {
+    Http::fake([
+        'https://example.test/fawry/status/v2*' => Http::response([
+            'type' => 'PaymentStatusResponse',
+            'orderStatus' => 'NEW',
+            'paymentAmount' => '3000.00',
+            'orderAmount' => '3000.00',
+        ]),
+    ]);
+
+    $payments = collect(range(1, 5))->map(function () {
+        [$booking, $payment] = pendingFawryPayment();
+
+        return $payment;
+    });
+
+    $this->artisan('fawry:sync-payments --limit=2')->assertSuccessful();
+
+    Http::assertSentCount(2);
 });
 
 /**

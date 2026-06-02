@@ -15,16 +15,25 @@ class FawryPaymentStatusSyncer
     ) {}
 
     /**
+     * @param  int  $limit  Maximum payments to check per run (prevents API flooding)
+     * @param  int  $maxAgeHours  Skip payments older than this many hours
      * @return array{synced: int, failed: int}
      */
-    public function sync(?callable $onSynced = null, ?callable $onFailed = null): array
+    public function sync(?callable $onSynced = null, ?callable $onFailed = null, int $limit = 100, int $maxAgeHours = 48): array
     {
         $synced = 0;
         $failed = 0;
+        $processed = 0;
 
-        $this->pendingPaymentsQuery()
-            ->chunkById(50, function ($payments) use (&$synced, &$failed, $onSynced, $onFailed): void {
+        $this->pendingPaymentsQuery($maxAgeHours)
+            ->chunkById(25, function ($payments) use (&$synced, &$failed, &$processed, $limit, $onSynced, $onFailed): bool {
                 foreach ($payments as $payment) {
+                    if ($processed >= $limit) {
+                        return false;
+                    }
+
+                    $processed++;
+
                     try {
                         $payload = $this->fawry->getPaymentStatus($payment);
                         $this->bookings->applyFawryStatus($payload, 'response_payload');
@@ -48,6 +57,8 @@ class FawryPaymentStatusSyncer
                         }
                     }
                 }
+
+                return true;
             });
 
         return [
@@ -56,11 +67,12 @@ class FawryPaymentStatusSyncer
         ];
     }
 
-    protected function pendingPaymentsQuery()
+    protected function pendingPaymentsQuery(int $maxAgeHours = 48)
     {
         return Payment::query()
             ->where('provider', 'fawry')
             ->whereIn('status', ['pending', 'created', 'unpaid', 'processing'])
+            ->where('created_at', '>=', now()->subHours($maxAgeHours))
             ->where(function ($query): void {
                 $query
                     ->whereNull('expires_at')

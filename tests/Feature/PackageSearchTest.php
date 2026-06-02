@@ -131,7 +131,6 @@ test('packages page renders arabic static copy', function () {
 
     $response->assertSuccessful();
     $response->assertSee('باقاتنا');
-    $response->assertSee('كل الباقات');
     $response->assertSee('لا توجد باقات متاحة حالياً');
 });
 

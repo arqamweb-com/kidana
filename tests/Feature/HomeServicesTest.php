@@ -1,10 +1,10 @@
 <?php
 
 use App\Models\Destination;
+use App\Models\Faq;
 use App\Models\Office;
 use App\Models\Partner;
 use App\Models\Service;
-use App\Models\Testimonial;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 
@@ -151,20 +151,19 @@ test('home page displays active partners in the trusted partners section', funct
     $response->assertDontSee('/storage/partners/hidden.png', false);
 });
 
-test('faq section renders the requested style partial', function () {
-    $homeTestimonials = collect([
-        Testimonial::factory()->make([
-            'name' => 'Nile Guest',
-            'testimonial' => 'The style one partial was rendered.',
-            'position' => 'Traveler',
+test('faq section renders faq items', function () {
+    $faqs = collect([
+        Faq::factory()->make([
+            'title' => ['en' => 'What is included in the package?'],
+            'answer' => ['en' => 'All meals and accommodation are included.'],
         ]),
     ]);
 
     $response = $this->blade(
-        '@include("sections.faq.faq", ["style" => "style-1"])',
-        ['homeTestimonials' => $homeTestimonials],
+        '@include("sections.faq")',
+        ['faqs' => $faqs],
     );
 
-    $response->assertSee('Nile Guest');
-    $response->assertSee('The style one partial was rendered.');
+    $response->assertSee('What is included in the package?');
+    $response->assertSee('All meals and accommodation are included.');
 });
