@@ -39,7 +39,7 @@
             'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=1200&q=80',
         );
         $whatsappText = rawurlencode(__('packages.show.whatsapp_message', ['package' => $package->name]));
-        $whatsappUrl = "https://wa.me/201033455433?text={$whatsappText}";
+        $whatsappUrl = 'https://wa.me/' . config('app.whatsapp_number') . "?text={$whatsappText}";
         $orderUrl = $package->order_action === \App\Enum\PackageOrderAction::FawryPayment
             ? route('packages.checkout', ['package' => $package->slug])
             : route('packages.request', ['package' => $package->slug]);
@@ -77,12 +77,17 @@
                     ['label' => $package->name],
                 ]"
                 />
-                <div class="flex flex-wrap gap-2 mb-5"><span
-                        class="inline-flex items-center gap-1 bg-primary text-primary-foreground text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                <div class="flex flex-wrap gap-2 mb-5">
+                    <div
+                        class="inline-flex items-center gap-1 bg-primary text-primary-foreground text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                             class="lucide lucide-flame w-3 h-3"><path
-                                d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg> {{ __('packages.show.popular') }}</span><span
+                                d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                        </svg>
+                        <span>{{ __('packages.show.popular') }}</span>
+                    </div>
+                    <span
                         class="bg-primary-foreground/20 backdrop-blur text-primary-foreground text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border border-primary-foreground/20">{{ __('packages.show.customizable') }}</span>
                 </div>
                 <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 max-w-3xl leading-tight">{{$package->name}}</h1>
@@ -209,8 +214,10 @@
                             <path d="M12 18h.01"></path>
                             <path d="M16 18h.01"></path>
                         </svg>
-                        <div><p class="text-[10px] uppercase tracking-wider text-muted-foreground">{{ __('packages.show.availability') }}</p>
-                            <p class="text-sm font-bold text-foreground">{{ __('packages.show.flexible_dates') }}</p></div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-wider text-muted-foreground">{{ __('packages.show.availability') }}</p>
+                            <p class="text-sm font-bold text-foreground">{{ __('packages.show.flexible_dates') }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -467,9 +474,9 @@
                                     EGP {{ number_format((float) $package->price, 0) }}</p>
                                 <p class="text-xs text-muted-foreground mt-1">{{ __('packages.show.price_note') }}</p>
                             </div>
-                            <a href="{{ $whatsappUrl }}" target="_blank" rel="noopener noreferrer"
+                            <a href="{{ $orderUrl }}" target="_blank" rel="noopener noreferrer"
                                class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-10 px-4 btn-premium bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl w-full py-7 text-base font-bold gap-2">
-                                {{ __('packages.show.book_now') }}
+                                {{ $orderLabel }}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                      stroke-linejoin="round" class="lucide lucide-arrow-right w-5 h-5">

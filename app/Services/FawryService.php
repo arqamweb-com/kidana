@@ -164,36 +164,65 @@ class FawryService
     public function verifyCallbackSignature(array $data): bool
     {
         $referenceNumber = (string) ($data['referenceNumber'] ?? $data['fawryRefNumber'] ?? '');
-        $merchantRefNumber = (string) ($data['merchantRefNumber'] ?? $data['merchantRefNum'] ?? '');
+
+        $merchantRefNumber = (string)(
+            $data['merchantRefNumber']
+            ?? $data['merchantRefNum']
+            ?? ''
+        );
+
         $paymentAmount = number_format((float) ($data['paymentAmount'] ?? 0), 2, '.', '');
         $orderAmount = number_format((float) ($data['orderAmount'] ?? 0), 2, '.', '');
+
         $orderStatus = (string) ($data['orderStatus'] ?? '');
         $paymentMethod = (string) ($data['paymentMethod'] ?? '');
-        $fawryFees = isset($data['fawryFees']) ? number_format((float) $data['fawryFees'], 2, '.', '') : '';
-        $shippingFees = isset($data['shippingFees']) ? number_format((float) $data['shippingFees'], 2, '.', '') : '';
+
+        $fawryFees = isset($data['fawryFees'])
+            ? number_format((float)$data['fawryFees'], 2, '.', '')
+            : '';
+
+        $shippingFees = isset($data['shippingFees'])
+            ? number_format((float)$data['shippingFees'], 2, '.', '')
+            : '';
+
         $authNumber = (string) ($data['authNumber'] ?? '');
-        $customerMail = (string) ($data['customerMail'] ?? '');
+
+        $customerMail = (string)(
+            $data['customerMail']
+            ?? $data['customerEmail']
+            ?? ''
+        );
+
         $customerMobile = (string) ($data['customerMobile'] ?? '');
-        $providedSignature = (string) ($data['signature'] ?? '');
+
+        $providedSignature = (string)(
+            $data['signature']
+            ?? $data['messageSignature']
+            ?? ''
+        );
 
         if ($providedSignature === '') {
             return false;
         }
 
-        $signaturePayload = $referenceNumber
-            .$merchantRefNumber
-            .$paymentAmount
-            .$orderAmount
-            .$orderStatus
-            .$paymentMethod
-            .$fawryFees
-            .$shippingFees
-            .$authNumber
-            .$customerMail
-            .$customerMobile
-            .$this->secureKey;
+        $signaturePayload =
+            $referenceNumber
+            . $merchantRefNumber
+            . $paymentAmount
+            . $orderAmount
+            . $orderStatus
+            . $paymentMethod
+            . $fawryFees
+            . $shippingFees
+            . $authNumber
+            . $customerMail
+            . $customerMobile
+            . $this->secureKey;
 
-        return hash_equals(hash('sha256', $signaturePayload), $providedSignature);
+        return hash_equals(
+            strtolower($providedSignature),
+            hash('sha256', $signaturePayload)
+        );
     }
 
     public function getJsUrl(): string

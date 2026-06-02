@@ -178,7 +178,7 @@ class BookingService
             'CANCELED', 'CANCELLED' => PaymentStatus::Failed,
             'REFUNDED' => PaymentStatus::Refunded,
             'PARTIAL_REFUNDED' => PaymentStatus::PartialRefunded,
-            'FAILED', 'UNPAID' => PaymentStatus::Failed,
+            'FAILED', 'UNPAID', 'REJECTED' => PaymentStatus::Failed,
             'NEW', 'CREATED', 'PROCESSING' => PaymentStatus::Pending,
             default => PaymentStatus::Pending,
         };
