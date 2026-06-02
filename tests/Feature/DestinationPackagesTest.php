@@ -84,6 +84,33 @@ test('destination show displays active packages only', function () {
     $response->assertDontSee('Hidden Egypt Package');
 });
 
+test('destination show renders translated static copy for the active locale', function () {
+    $destination = Destination::factory()->create([
+        'name' => [
+            'en' => 'Egypt',
+            'ar' => 'مصر',
+        ],
+        'slug' => 'egypt',
+        'is_active' => true,
+    ]);
+
+    Package::factory()->create([
+        'destination_id' => $destination->id,
+        'name' => 'Cairo Discovery',
+        'is_active' => true,
+    ]);
+
+    $response = $this->get('/ar/destinations/'.$destination->slug);
+
+    $response->assertSuccessful();
+    $response->assertSee('العودة إلى الباقات');
+    $response->assertSee('الوجهة');
+    $response->assertSee('استعرض الباقات السياحية المتاحة إلى مصر.');
+    $response->assertSee('باقة واحدة متاحة الآن');
+    $response->assertDontSee('Back to packages');
+    $response->assertDontSee('Explore active travel packages available for');
+});
+
 test('inactive destination show page returns not found', function () {
     $destination = Destination::factory()->create([
         'slug' => 'hidden-destination',

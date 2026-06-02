@@ -32,9 +32,11 @@
             <a href="{{ route('packages') }}"
                 class="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] transition-colors hover:bg-primary-foreground hover:text-secondary">
                 <span>&larr;</span>
-                <span>Back to packages</span>
+                <span>{{ __('destinations.show.back_to_packages') }}</span>
             </a>
-            <p class="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-primary">Destination</p>
+            <p class="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+                {{ __('destinations.show.eyebrow') }}
+            </p>
             <h1 class="text-4xl font-bold leading-tight md:text-6xl">{{ $destination->name }}</h1>
         </div>
     </section>
@@ -42,10 +44,10 @@
     <section class="section-padding bg-background">
         <div class="mb-12 text-center">
             <p class="mx-auto max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                Explore active travel packages available for {{ $destination->name }}.
+                {{ __('destinations.show.description', ['destination' => $destination->name]) }}
             </p>
             <p class="mt-3 text-sm text-muted-foreground">
-                {{ $packages->count() }} package{{ $packages->count() === 1 ? '' : 's' }} available now
+                {{ trans_choice('destinations.show.available_count', $packages->count(), ['count' => $packages->count()]) }}
             </p>
         </div>
 
