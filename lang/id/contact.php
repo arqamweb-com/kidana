@@ -19,5 +19,13 @@ return [
         'phone' => 'Nomor Telepon',
         'message' => 'Pesan Anda',
         'submit' => 'Kirim Pesan',
+        'success' => 'Pesan Anda telah berhasil dikirim. Kami akan segera menghubungi Anda.',
+    ],
+    'mail' => [
+        'subject' => 'Pesan kontak baru dari :name',
+        'heading' => 'Pesan Kontak Baru',
+        'from' => 'Nama',
+        'email' => 'Email',
+        'phone' => 'Telepon',
     ],
 ];

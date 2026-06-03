@@ -9,6 +9,7 @@ use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageSearchController;
 use App\Http\Controllers\PackageShowController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -39,7 +40,8 @@ Route::prefix('{locale}')
         Route::get('/destinations', DestinationIndexController::class)->name('destinations.index');
         Route::get('/destinations/{destination:slug}', DestinationController::class)->name('destinations.show');
 
-        Route::view('/contact', 'pages.contact')->name('contact');
+        Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+        Route::post('/contact', [ContactController::class, 'store'])->name('contact.store')->middleware('throttle:5,1');
 
         Route::view('/about', 'pages.about')->name('about');
 

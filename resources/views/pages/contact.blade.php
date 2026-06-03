@@ -79,15 +79,52 @@
                         </div>
                     </div>
                     <div class="bg-muted/50 rounded-2xl p-8 border border-border/40">
-                        <form class="space-y-5"><input type="text" placeholder="{{ __('contact.form.name') }}"
-                                class="w-full px-4 py-3 rounded-xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"><input
-                                type="email" placeholder="{{ __('contact.form.email') }}"
-                                class="w-full px-4 py-3 rounded-xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"><input
-                                type="tel" placeholder="{{ __('contact.form.phone') }}"
-                                class="w-full px-4 py-3 rounded-xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
-                            <textarea placeholder="{{ __('contact.form.message') }}" rows="4"
-                                class="w-full px-4 py-3 rounded-xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"></textarea><button
-                                class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-10 px-4 w-full btn-premium bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl py-6 font-semibold">{{ __('contact.form.submit') }}</button>
+                        @if (session('success'))
+                            <div class="mb-5 rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
+                        <form action="{{ route('contact.store', ['locale' => app()->getLocale()]) }}" method="POST" class="space-y-5">
+                            @csrf
+
+                            <div>
+                                <input type="text" name="name" value="{{ old('name') }}"
+                                    placeholder="{{ __('contact.form.name') }}"
+                                    class="w-full px-4 py-3 rounded-xl bg-background border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 {{ $errors->has('name') ? 'border-red-400' : 'border-border' }}">
+                                @error('name')
+                                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <input type="email" name="email" value="{{ old('email') }}"
+                                    placeholder="{{ __('contact.form.email') }}"
+                                    class="w-full px-4 py-3 rounded-xl bg-background border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 {{ $errors->has('email') ? 'border-red-400' : 'border-border' }}">
+                                @error('email')
+                                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <input type="tel" name="phone" value="{{ old('phone') }}"
+                                    placeholder="{{ __('contact.form.phone') }}"
+                                    class="w-full px-4 py-3 rounded-xl bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            </div>
+
+                            <div>
+                                <textarea name="message" rows="4"
+                                    placeholder="{{ __('contact.form.message') }}"
+                                    class="w-full px-4 py-3 rounded-xl bg-background border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none {{ $errors->has('message') ? 'border-red-400' : 'border-border' }}">{{ old('message') }}</textarea>
+                                @error('message')
+                                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 w-full btn-premium bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl py-6 font-semibold">
+                                {{ __('contact.form.submit') }}
+                            </button>
                         </form>
                     </div>
                 </div>

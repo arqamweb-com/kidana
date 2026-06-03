@@ -19,5 +19,13 @@ return [
         'phone' => 'Numéro de téléphone',
         'message' => 'Votre message',
         'submit' => 'Envoyer le message',
+        'success' => 'Votre message a bien été envoyé. Nous vous répondrons rapidement.',
+    ],
+    'mail' => [
+        'subject' => 'Nouveau message de contact de :name',
+        'heading' => 'Nouveau message de contact',
+        'from' => 'Nom',
+        'email' => 'E-mail',
+        'phone' => 'Téléphone',
     ],
 ];

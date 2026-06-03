@@ -19,5 +19,13 @@ return [
         'phone' => 'Phone Number',
         'message' => 'Your Message',
         'submit' => 'Send Message',
+        'success' => 'Your message has been sent successfully. We\'ll get back to you soon.',
+    ],
+    'mail' => [
+        'subject' => 'New contact message from :name',
+        'heading' => 'New Contact Message',
+        'from' => 'Name',
+        'email' => 'Email',
+        'phone' => 'Phone',
     ],
 ];
