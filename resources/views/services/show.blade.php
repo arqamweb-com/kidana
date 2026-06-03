@@ -314,7 +314,7 @@
                     @csrf
 
                     @if ($inquirySent)
-                        <div class="rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
+                        <div class="rounded-xl bg-green-600 border border-green-700 px-4 py-3 text-sm font-medium text-white">
                             {{ __('services.show.form.success') }}
                         </div>
                     @endif

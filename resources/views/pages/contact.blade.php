@@ -80,7 +80,7 @@
                     </div>
                     <div class="bg-muted/50 rounded-2xl p-8 border border-border/40">
                         @if (session('success'))
-                            <div class="mb-5 rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
+                            <div class="mb-5 rounded-xl bg-green-600 border border-green-700 px-4 py-3 text-sm font-medium text-white">
                                 {{ session('success') }}
                             </div>
                         @endif
