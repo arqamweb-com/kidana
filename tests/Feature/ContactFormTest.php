@@ -19,7 +19,7 @@ it('sends a contact email and redirects with success', function () {
         ->assertRedirect('/en/contact')
         ->assertSessionHas('success');
 
-    Mail::assertQueued(ContactMessageReceived::class, function (ContactMessageReceived $mail) {
+    Mail::assertSent(ContactMessageReceived::class, function (ContactMessageReceived $mail) {
         return $mail->senderName === 'Ahmed Test'
             && $mail->senderEmail === 'ahmed@example.com'
             && $mail->body === 'I would like to book a package.';
@@ -32,7 +32,7 @@ it('fails validation when required fields are missing', function () {
     $this->post('/en/contact', [])
         ->assertSessionHasErrors(['name', 'email', 'message']);
 
-    Mail::assertNothingQueued();
+    Mail::assertNothingSent();
 });
 
 it('fails validation with an invalid email', function () {
@@ -44,7 +44,7 @@ it('fails validation with an invalid email', function () {
         'message' => 'Hello',
     ])->assertSessionHasErrors(['email']);
 
-    Mail::assertNothingQueued();
+    Mail::assertNothingSent();
 });
 
 it('sends without phone since it is optional', function () {
@@ -58,5 +58,5 @@ it('sends without phone since it is optional', function () {
         ->assertRedirect('/en/contact')
         ->assertSessionHas('success');
 
-    Mail::assertQueued(ContactMessageReceived::class);
+    Mail::assertSent(ContactMessageReceived::class);
 });

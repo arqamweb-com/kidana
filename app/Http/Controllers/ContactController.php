@@ -20,7 +20,7 @@ class ContactController extends Controller
         $data = $request->validated();
 
         Mail::to(config('mail.contact_address', config('mail.from.address')))
-            ->queue(new ContactMessageReceived(
+            ->send(new ContactMessageReceived(
                 senderName: $data['name'],
                 senderEmail: $data['email'],
                 senderPhone: $data['phone'] ?? null,
