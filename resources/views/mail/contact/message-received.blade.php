@@ -2,11 +2,13 @@
 # {{ __('contact.mail.heading') }}
 
 **{{ __('contact.mail.from') }}:** {{ $senderName }}
+
 **{{ __('contact.mail.email') }}:** {{ $senderEmail }}
+
 @if ($senderPhone)
 **{{ __('contact.mail.phone') }}:** {{ $senderPhone }}
-@endif
 
+@endif
 ---
 
 {{ $body }}

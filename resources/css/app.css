@@ -148,6 +148,12 @@ body {
     border-color: hsl(var(--border));
 }
 
+button,
+[role="button"],
+a {
+    cursor: pointer;
+}
+
 h1,
 h2,
 h3,

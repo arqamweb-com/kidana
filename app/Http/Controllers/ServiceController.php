@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreServiceInquiryRequest;
+use App\Mail\ServiceInquiryReceived;
 use App\Models\Service;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Mail;
 
 class ServiceController extends Controller
 {
@@ -13,7 +17,7 @@ class ServiceController extends Controller
             'services' => Service::query()
                 ->active()
                 ->orderBy('sort_order')
-                ->orderBy('name->' . app()->getLocale())
+                ->orderBy('name->'.app()->getLocale())
                 ->get(),
         ]);
     }
@@ -28,6 +32,7 @@ class ServiceController extends Controller
         ]);
 
         return view('services.show', [
+            'inquirySent' => session('inquiry_sent'),
             'service' => $service,
             'servicePackages' => $service->packages()
                 ->with('destination:id,name,slug')
@@ -40,9 +45,31 @@ class ServiceController extends Controller
                 ->active()
                 ->whereKeyNot($service->getKey())
                 ->orderBy('sort_order')
-                ->orderBy('name->' . app()->getLocale())
+                ->orderBy('name->'.app()->getLocale())
                 ->limit(4)
                 ->get(),
         ]);
+    }
+
+    public function inquiry(StoreServiceInquiryRequest $request, string $locale, Service $service): RedirectResponse
+    {
+        abort_unless($service->is_active, 404);
+
+        $data = $request->validated();
+
+        Mail::to(config('mail.contact_address', config('mail.from.address')))
+            ->send(new ServiceInquiryReceived(
+                serviceName: $service->getTranslation('name', $locale),
+                senderName: $data['name'],
+                senderEmail: $data['email'],
+                senderPhone: $data['phone'],
+                travelDate: $data['travel_date'] ?? null,
+                people: isset($data['people']) ? (int) $data['people'] : null,
+                body: $data['message'] ?? null,
+            ));
+
+        return redirect()
+            ->route('services.show', ['locale' => $locale, 'service' => $service->slug])
+            ->with('inquiry_sent', true);
     }
 }

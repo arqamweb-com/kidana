@@ -36,6 +36,7 @@ Route::prefix('{locale}')
 
         Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
         Route::get('/services/{service:slug}', [ServiceController::class, 'show'])->name('services.show');
+        Route::post('/services/{service:slug}/inquiry', [ServiceController::class, 'inquiry'])->name('services.inquiry')->middleware('throttle:5,1');
 
         Route::get('/destinations', DestinationIndexController::class)->name('destinations.index');
         Route::get('/destinations/{destination:slug}', DestinationController::class)->name('destinations.show');

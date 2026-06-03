@@ -307,51 +307,67 @@
                         class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('services.show.inquiry_eyebrow') }}</p>
                     <h2 class="text-3xl md:text-5xl font-bold text-foreground mb-4">{{ __('services.show.inquiry_title') }}</h2>
                     <p class="text-muted-foreground text-base md:text-lg">{{ __('services.show.inquiry_description') }}</p></div>
-                <form class="bg-card rounded-2xl p-8 md:p-10 border border-border/60 shadow-xl space-y-5">
+                <form
+                    action="{{ route('services.inquiry', ['locale' => app()->getLocale(), 'service' => $service->slug]) }}"
+                    method="POST"
+                    class="bg-card rounded-2xl p-8 md:p-10 border border-border/60 shadow-xl space-y-5">
+                    @csrf
+
+                    @if ($inquirySent)
+                        <div class="rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
+                            {{ __('services.show.form.success') }}
+                        </div>
+                    @endif
+
                     <div class="grid md:grid-cols-2 gap-5">
-                        <div class="space-y-2"><label
-                                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                for="name">{{ __('services.show.form.name') }}</label><input
-                                class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12"
-                                id="name" placeholder="{{ __('services.show.form.name_placeholder') }}" maxlength="100" value=""></div>
-                        <div class="space-y-2"><label
-                                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                for="phone">{{ __('services.show.form.phone') }}</label><input type="tel"
-                                                                       class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12"
-                                                                       id="phone" placeholder="{{ __('services.show.form.phone_placeholder') }}"
-                                                                       maxlength="30" value=""></div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="name">{{ __('services.show.form.name') }}</label>
+                            <input name="name" id="name" value="{{ old('name') }}" maxlength="100"
+                                placeholder="{{ __('services.show.form.name_placeholder') }}"
+                                class="flex w-full rounded-md border bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12 {{ $errors->has('name') ? 'border-red-400' : 'border-input' }}">
+                            @error('name') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="phone">{{ __('services.show.form.phone') }}</label>
+                            <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" maxlength="30"
+                                placeholder="{{ __('services.show.form.phone_placeholder') }}"
+                                class="flex w-full rounded-md border bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12 {{ $errors->has('phone') ? 'border-red-400' : 'border-input' }}">
+                            @error('phone') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
                     </div>
-                    <div class="space-y-2"><label
-                            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            for="email">{{ __('services.show.form.email') }}</label><input type="email"
-                                                                    class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12"
-                                                                    id="email" placeholder="{{ __('services.show.form.email_placeholder') }}"
-                                                                    maxlength="255" value=""></div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="email">{{ __('services.show.form.email') }}</label>
+                        <input type="email" name="email" id="email" value="{{ old('email') }}" maxlength="255"
+                            placeholder="{{ __('services.show.form.email_placeholder') }}"
+                            class="flex w-full rounded-md border bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12 {{ $errors->has('email') ? 'border-red-400' : 'border-input' }}">
+                        @error('email') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+                    </div>
                     <div class="grid md:grid-cols-2 gap-5">
-                        <div class="space-y-2"><label
-                                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                for="date">{{ __('services.show.form.travel_date') }}</label><input type="date"
-                                                                     class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12"
-                                                                     id="date" value=""></div>
-                        <div class="space-y-2"><label
-                                class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                for="people">{{ __('services.show.form.people') }}</label><input type="number"
-                                                                            class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12"
-                                                                            id="people" min="1" placeholder="{{ __('services.show.form.people_placeholder') }}"
-                                                                            value=""></div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="date">{{ __('services.show.form.travel_date') }}</label>
+                            <input type="date" name="travel_date" id="date" value="{{ old('travel_date') }}"
+                                class="flex w-full rounded-md border bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12 {{ $errors->has('travel_date') ? 'border-red-400' : 'border-input' }}">
+                            @error('travel_date') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="people">{{ __('services.show.form.people') }}</label>
+                            <input type="number" name="people" id="people" value="{{ old('people') }}" min="1"
+                                placeholder="{{ __('services.show.form.people_placeholder') }}"
+                                class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm h-12">
+                        </div>
                     </div>
-                    <div class="space-y-2"><label
-                            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            for="message">{{ __('services.show.form.message') }}</label><textarea
-                            class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]"
-                            id="message" placeholder="{{ __('services.show.form.message_placeholder') }}" maxlength="1000"></textarea>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="message">{{ __('services.show.form.message') }}</label>
+                        <textarea name="message" id="message" maxlength="1000"
+                            placeholder="{{ __('services.show.form.message_placeholder') }}"
+                            class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[120px]">{{ old('message') }}</textarea>
                     </div>
-                    <button
-                        class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-10 px-4 btn-premium bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl w-full py-7 text-base font-semibold gap-2 shadow-[0_8px_30px_-4px_hsl(var(--primary)/0.5)]"
-                        type="submit">{{ __('services.show.form.submit') }}
+                    <button type="submit"
+                        class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-10 px-4 btn-premium bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl w-full py-7 text-base font-semibold gap-2 shadow-[0_8px_30px_-4px_hsl(var(--primary)/0.5)]">
+                        {{ __('services.show.form.submit') }}
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                             class="lucide lucide-arrow-right w-5 h-5">
+                             class="lucide lucide-arrow-right w-5 h-5 rtl:rotate-180">
                             <path d="M5 12h14"></path>
                             <path d="m12 5 7 7-7 7"></path>
                         </svg>
