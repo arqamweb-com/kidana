@@ -124,7 +124,7 @@
 
     <div data-mobile-menu class="hidden border-t border-border bg-card/98 backdrop-blur-xl lg:hidden">
         <div class="container mx-auto flex flex-col gap-1 px-4 py-5">
-            <a href="#home"
+            <a href="{{ route('home') }}"
                class="inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">{{ __('nav.home') }}</a>
             <div>
                 <button type="button" data-mobile-services-trigger
@@ -148,17 +148,17 @@
                     @endforeach
                 </div>
             </div>
-            <a href="#packages"
+            <a href="{{ route('packages') }}"
                class="inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">{{ __('nav.packages') }}</a>
-            <a href="#umrah-plus"
+            <a href="{{ route('umrah-plus') }}"
                class="inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">
                 <span>{{ __('nav.umrah_plus') }}</span>
                 <span
                     class="rounded-md bg-[#f05c01] px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wider text-white">{{ __('nav.new') }}</span>
             </a>
-            <a href="#about"
+            <a href="{{ route('about') }}"
                class="inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">{{ __('nav.about') }}</a>
-            <a href="#contact"
+            <a href="{{ route('contact') }}"
                class="inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">{{ __('nav.contact') }}</a>
 
             <div class="mt-3 flex items-center gap-2 px-3">
