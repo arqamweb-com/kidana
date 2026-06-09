@@ -196,7 +196,12 @@
                         <div>
                             <p class="text-[10px] uppercase tracking-wider text-muted-foreground">{{ __('packages.show.starting_from') }}</p>
                             <p class="text-sm font-bold text-foreground">
-                                EGP {{ number_format((float) $package->price, 0) }}</p>
+                                @if($package->price > 0)
+                                    EGP {{ number_format((float) $package->price, 0) }}
+                                @else
+                                    {{ __('packages.show.on_request') }}
+                                @endif
+                            </p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
@@ -471,8 +476,15 @@
                             <div>
                                 <p class="text-xs uppercase tracking-wider text-muted-foreground mb-1">{{ __('packages.show.starting_from') }}</p>
                                 <p class="text-3xl md:text-4xl font-bold text-primary">
-                                    EGP {{ number_format((float) $package->price, 0) }}</p>
-                                <p class="text-xs text-muted-foreground mt-1">{{ __('packages.show.price_note') }}</p>
+                                    @if($package->price > 0)
+                                        EGP {{ number_format((float) $package->price, 0) }}
+                                    @else
+                                        {{ __('packages.show.on_request') }}
+                                    @endif
+                                </p>
+                                @if($package->price > 0)
+                                    <p class="text-xs text-muted-foreground mt-1">{{ __('packages.show.price_note') }}</p>
+                                @endif
                             </div>
                             <a href="{{ $orderUrl }}" target="_blank" rel="noopener noreferrer"
                                class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-10 px-4 btn-premium bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl w-full py-7 text-base font-bold gap-2">

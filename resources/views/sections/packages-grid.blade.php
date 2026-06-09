@@ -44,7 +44,11 @@
 
                             <div
                                 class="absolute end-4 top-4 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]">
-                                EG {{ number_format((float) $package->price, 0) }}
+                                @if($package->price > 0)
+                                    EGP {{ number_format((float) $package->price, 0) }}
+                                @else
+                                    {{ __('packages.show.on_request') }}
+                                @endif
                             </div>
 
                             <div

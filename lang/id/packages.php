@@ -72,6 +72,7 @@ return [
         'highlights_empty_title' => 'Belum ada sorotan yang tersedia',
         'highlights_empty_description' => 'Tambahkan sorotan paket dari dashboard dan sorotan tersebut akan tampil otomatis di sini.',
         'price_note' => 'per wisatawan · termasuk pajak dan biaya',
+        'on_request' => 'Atas Permintaan',
         'whatsapp' => 'Hubungi via WhatsApp',
         'secure_booking' => 'Proses pemesanan aman',
         'flexible_cancellation' => 'Opsi pembatalan fleksibel',

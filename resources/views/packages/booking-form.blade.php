@@ -90,7 +90,13 @@
                     <dl class="mt-6 space-y-4 text-sm">
                         <div class="flex items-center justify-between gap-4">
                             <dt class="text-muted-foreground">{{ __('packages.show.starting_from') }}</dt>
-                            <dd class="font-bold text-foreground">EGP {{ number_format((float) $package->price, 2) }}</dd>
+                            <dd class="font-bold text-foreground">
+                                @if($package->price > 0)
+                                    EGP {{ number_format((float) $package->price, 2) }}
+                                @else
+                                    {{ __('packages.show.on_request') }}
+                                @endif
+                            </dd>
                         </div>
                         @if ($package->days)
                             <div class="flex items-center justify-between gap-4">

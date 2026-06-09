@@ -5,7 +5,7 @@ return [
     'eyebrow' => 'Legal',
     'meta_description' => 'Baca syarat dan ketentuan Kidana Travel untuk pemesanan paket perjalanan dan penggunaan layanan kami.',
     'footer_tagline' => 'Perencanaan Perjalanan Profesional. Pengalaman yang Tak Terlupakan.',
-    'fawri_notice' => 'Tanggung jawab Fawri terbatas hanya pada pengumpulan pembayaran. Untuk pertanyaan apa pun, silakan hubungi kami — Tidak ada produk atau layanan — Tidak ada harga — Tidak ada halaman pembayaran.',
+    'fawri_notice' => 'Tanggung jawab Fawri terbatas hanya pada pengumpulan pembayaran. Untuk pertanyaan apa pun, silakan hubungi kami.',
 
     'intro' => [
         'Selamat datang di Kidana Travel. Dengan mengakses dan menggunakan situs web, layanan kami, atau mengajukan permintaan pemesanan, Anda setuju untuk mematuhi Syarat & Ketentuan berikut. Harap baca dengan saksama sebelum menggunakan situs web atau layanan kami.',

@@ -66,8 +66,9 @@ class PackageForm
                                 ->maxLength(255),
                             TextInput::make('price')
                                 ->required()
-                                ->integer()
-                                ->minValue(0),
+                                ->inputMode('numeric')
+                                ->rules(['integer', 'min:0'])
+                                ->dehydrateStateUsing(fn ($state) => (int) preg_replace('/[^\d]/', '', (string) $state)),
                             Select::make('order_action')
                                 ->label('Order button action')
                                 ->options(PackageOrderAction::options())

@@ -72,6 +72,7 @@ return [
         'highlights_empty_title' => 'لا توجد مميزات متاحة حالياً',
         'highlights_empty_description' => 'أضف مميزات الباقة من لوحة التحكم وستظهر هنا تلقائياً.',
         'price_note' => 'لكل مسافر · شامل الضرائب والرسوم',
+        'on_request' => 'عند الطلب',
         'whatsapp' => 'تواصل عبر واتساب',
         'secure_booking' => 'عملية حجز آمنة',
         'flexible_cancellation' => 'خيارات إلغاء مرنة',

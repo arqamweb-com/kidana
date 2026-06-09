@@ -72,6 +72,7 @@ return [
         'highlights_empty_title' => 'Aucun point fort disponible pour le moment',
         'highlights_empty_description' => 'Ajoutez les points forts du forfait depuis le tableau de bord et ils apparaîtront ici automatiquement.',
         'price_note' => 'par voyageur · taxes et frais inclus',
+        'on_request' => 'Sur Demande',
         'whatsapp' => 'Contacter via WhatsApp',
         'secure_booking' => 'Processus de réservation sécurisé',
         'flexible_cancellation' => 'Options d’annulation flexibles',

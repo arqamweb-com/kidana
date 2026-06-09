@@ -72,6 +72,7 @@ return [
         'highlights_empty_title' => 'No highlights available yet',
         'highlights_empty_description' => 'Add package highlights from the dashboard and they will appear here automatically.',
         'price_note' => 'per traveler · taxes & fees included',
+        'on_request' => 'On Request',
         'whatsapp' => 'Contact via WhatsApp',
         'secure_booking' => 'Secure booking process',
         'flexible_cancellation' => 'Flexible cancellation options',
