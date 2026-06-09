@@ -58,9 +58,14 @@
                         @endforeach
                     </div>
 
-                    <div class="mt-14 pt-10 border-t border-border/60 text-center">
-                        <p class="text-foreground font-semibold text-lg">Kidana Travel</p>
-                        <p class="text-muted-foreground italic mt-1">{{ __('terms_and_conditions.footer_tagline') }}</p>
+                    <div class="mt-14 pt-10 border-t border-border/60">
+                        <div class="rounded-lg border border-primary/30 bg-primary/5 px-6 py-5 mb-10">
+                            <p class="text-foreground font-medium text-center leading-relaxed">{{ __('terms_and_conditions.fawri_notice') }}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-foreground font-semibold text-lg">Kidana Travel</p>
+                            <p class="text-muted-foreground italic mt-1">{{ __('terms_and_conditions.footer_tagline') }}</p>
+                        </div>
                     </div>
                 </div>
             </div>

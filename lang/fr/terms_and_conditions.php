@@ -5,6 +5,7 @@ return [
     'eyebrow' => 'Légal',
     'meta_description' => 'Lisez les conditions générales de Kidana Travel pour la réservation de forfaits et l\'utilisation de nos services.',
     'footer_tagline' => 'Planification de voyages professionnelle. Des expériences mémorables.',
+    'fawri_notice' => 'La responsabilité de Fawri se limite uniquement à la collecte des paiements. Pour toute question, veuillez nous contacter — Aucun produit ou service — Aucun tarif — Aucune page de paiement.',
 
     'intro' => [
         'Bienvenue chez Kidana Travel. En accédant à notre site web, en utilisant nos services ou en soumettant une demande de réservation, vous acceptez de vous conformer aux présentes Conditions Générales. Veuillez les lire attentivement avant d\'utiliser notre site web ou nos services.',

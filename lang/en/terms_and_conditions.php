@@ -5,6 +5,7 @@ return [
     'eyebrow' => 'Legal',
     'meta_description' => 'Read Kidana Travel\'s terms and conditions for booking travel packages and using our services.',
     'footer_tagline' => 'Professional Travel Planning. Memorable Experiences.',
+    'fawri_notice' => 'Fawri\'s responsibility is limited to payment collection only. For any inquiries, please contact us — No products or services — No prices — No payment page.',
 
     'intro' => [
         'Welcome to Kidana Travel. By accessing and using our website, services, or submitting any booking request, you agree to comply with and be bound by the following Terms & Conditions. Please read them carefully before using our website or services.',
