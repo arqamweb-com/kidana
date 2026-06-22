@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\BookNowController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CustomPackageController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\DestinationIndexController;
 use App\Http\Controllers\FawryWebhookController;
@@ -9,9 +12,9 @@ use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageSearchController;
 use App\Http\Controllers\PackageShowController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\VisitEgyptController;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +59,13 @@ Route::prefix('{locale}')
         Route::get('/bookings/{booking}/result', [PackageBookingController::class, 'result'])->name('bookings.result');
 
         Route::view('/umrah-plus', 'pages.umrah-plus')->name('umrah-plus');
+
+        Route::get('/visit-egypt', VisitEgyptController::class)->name('visit-egypt');
+
+        Route::get('/book-now', BookNowController::class)->name('book-now');
+        Route::post('/book-now/custom-package', [CustomPackageController::class, 'store'])
+            ->name('book-now.custom-package')
+            ->middleware('throttle:5,1');
 
         Route::view('/terms-and-conditions', 'pages.terms-and-conditions')->name('terms-and-conditions');
         Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy-policy');

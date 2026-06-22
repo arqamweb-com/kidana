@@ -21,7 +21,7 @@
         $nextChevronPath = $isRtl ? 'm15 18-6-6 6-6' : 'm9 18 6-6-6-6';
     @endphp
 
-    <section id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="home" data-hero-section class="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div data-hero-bg
              class="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 transition-opacity duration-1800 ease-in-out"
              style="background-image: url(https://www.arqamweb.com/wp-content/uploads/2026/04/Slide-1.jpg); opacity: 1;">

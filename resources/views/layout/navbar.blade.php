@@ -105,10 +105,10 @@
                 <span>+201033455433</span>
             </a>
 
-            <a href="#packages"
+            <a href="{{ route('visit-egypt') }}"
                class="btn-premium inline-flex h-9 items-center justify-center gap-2 rounded-xl border-0 bg-primary px-7 text-sm font-semibold whitespace-nowrap text-primary-foreground transition-colors hover:bg-primary/90"
                style="background-color: rgb(50, 113, 107);">{{ __('nav.visit_egypt') }}</a>
-            <a href="#contact"
+            <a href="{{ route('book-now') }}"
                class="btn-premium inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-primary px-7 text-sm font-semibold whitespace-nowrap text-primary-foreground transition-colors hover:bg-primary/90">{{ __('nav.book_now') }}</a>
         </div>
 
@@ -156,6 +156,8 @@
                 <span
                     class="rounded-md bg-[#f05c01] px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none tracking-wider text-white">{{ __('nav.new') }}</span>
             </a>
+            <a href="{{ route('visit-egypt') }}"
+               class="inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">{{ __('nav.visit_egypt') }}</a>
             <a href="{{ route('about') }}"
                class="inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">{{ __('nav.about') }}</a>
             <a href="{{ route('contact') }}"
@@ -180,10 +182,10 @@
                 @endforeach
             </div>
 
-            <a href="#packages"
+            <a href="{{ route('visit-egypt') }}"
                class="btn-premium mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-xl border-0 bg-primary px-4 py-2 text-sm font-medium whitespace-nowrap text-primary-foreground transition-colors hover:bg-primary/90"
                style="background-color: rgb(50, 113, 107);">{{ __('nav.visit_egypt') }}</a>
-            <a href="#contact"
+            <a href="{{ route('book-now') }}"
                class="btn-premium mt-2 inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium whitespace-nowrap text-primary-foreground transition-colors hover:bg-primary/90">{{ __('nav.book_now') }}</a>
         </div>
     </div>

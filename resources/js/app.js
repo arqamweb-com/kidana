@@ -131,10 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const revealElements = document.querySelectorAll('[data-reveal]');
-    const heroSection = document.querySelector('#home');
-    const heroBackgrounds = heroSection?.querySelectorAll('[data-hero-bg]') ?? [];
-    const heroContents = heroSection?.querySelectorAll('[data-hero-content]') ?? [];
-    const heroIndicators = heroSection?.querySelectorAll('[data-hero-indicator]') ?? [];
     const testimonialsSlider = document.querySelector('[data-testimonials-slider]');
     const testimonialSlides = testimonialsSlider?.querySelectorAll('[data-testimonial-slide]') ?? [];
     const testimonialIndicators = testimonialsSlider?.querySelectorAll('[data-testimonial-indicator]') ?? [];
@@ -264,7 +260,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (heroBackgrounds.length > 1 && heroContents.length === heroBackgrounds.length) {
+    const initHeroSection = (heroSection) => {
+        const heroBackgrounds = heroSection.querySelectorAll('[data-hero-bg]');
+        const heroContents = heroSection.querySelectorAll('[data-hero-content]');
+        const heroIndicators = heroSection.querySelectorAll('[data-hero-indicator]');
+
+        const hasMatchingContents = heroContents.length === heroBackgrounds.length;
+        const backgroundOnly = heroContents.length === 0;
+
+        if (heroBackgrounds.length <= 1 || (! hasMatchingContents && ! backgroundOnly)) {
+            return;
+        }
+
         let activeHeroSlide = 0;
         let heroIntervalId;
 
@@ -316,14 +323,218 @@ document.addEventListener('DOMContentLoaded', () => {
         renderHeroSlide(0);
         startHeroAutoplay();
 
-        heroSection?.addEventListener('mouseenter', () => {
+        heroSection.addEventListener('mouseenter', () => {
             clearInterval(heroIntervalId);
         });
 
-        heroSection?.addEventListener('mouseleave', () => {
+        heroSection.addEventListener('mouseleave', () => {
             startHeroAutoplay();
         });
+    };
+
+    document.querySelectorAll('[data-hero-section]').forEach(initHeroSection);
+
+    const videoModal = document.querySelector('[data-video-modal]');
+    const videoFrame = videoModal?.querySelector('[data-video-frame]');
+    const videoTriggers = document.querySelectorAll('[data-video-trigger]');
+
+    if (videoModal && videoFrame && videoTriggers.length > 0) {
+        const openVideoModal = (videoId) => {
+            videoFrame.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&playsinline=1`;
+            videoModal.classList.remove('hidden');
+            videoModal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+        };
+
+        const closeVideoModal = () => {
+            videoModal.classList.add('hidden');
+            videoModal.classList.remove('flex');
+            videoFrame.src = '';
+            document.body.classList.remove('overflow-hidden');
+        };
+
+        videoTriggers.forEach((trigger) => {
+            trigger.addEventListener('click', () => {
+                const videoId = trigger.dataset.videoId;
+
+                if (videoId) {
+                    openVideoModal(videoId);
+                }
+            });
+        });
+
+        videoModal.querySelector('[data-video-close]')?.addEventListener('click', closeVideoModal);
+
+        videoModal.addEventListener('click', (event) => {
+            if (event.target === videoModal) {
+                closeVideoModal();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && ! videoModal.classList.contains('hidden')) {
+                closeVideoModal();
+            }
+        });
     }
+
+    document.querySelectorAll('[data-booknow-tabs]').forEach((tabsRoot) => {
+        const tabs = tabsRoot.querySelectorAll('[data-booknow-tab]');
+        const panels = tabsRoot.querySelectorAll('[data-booknow-panel]');
+
+        const activateTab = (name) => {
+            tabs.forEach((tab) => {
+                const isActive = tab.dataset.booknowTab === name;
+                tab.dataset.state = isActive ? 'active' : 'inactive';
+                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+
+            panels.forEach((panel) => {
+                panel.hidden = panel.dataset.booknowPanel !== name;
+            });
+        };
+
+        tabs.forEach((tab) => {
+            tab.addEventListener('click', () => activateTab(tab.dataset.booknowTab));
+        });
+
+        const packageCards = tabsRoot.querySelectorAll('.book-now-package-card');
+        const packageFilters = tabsRoot.querySelectorAll('[data-package-filter]');
+        const packageEmpty = tabsRoot.querySelector('[data-package-empty]');
+
+        if (packageCards.length > 0 && packageFilters.length > 0) {
+            const inRange = (value, range) => {
+                if (! range) {
+                    return true;
+                }
+
+                const [min, max] = range.split('-');
+
+                if (min !== '' && value < Number(min)) {
+                    return false;
+                }
+
+                if (max !== undefined && max !== '' && value > Number(max)) {
+                    return false;
+                }
+
+                return true;
+            };
+
+            const applyPackageFilters = () => {
+                const filters = {};
+                packageFilters.forEach((filter) => {
+                    filters[filter.dataset.packageFilter] = filter.value;
+                });
+
+                let visibleCount = 0;
+
+                packageCards.forEach((card) => {
+                    const matchesType = ! filters.type || card.dataset.service === filters.type;
+                    const matchesBudget = inRange(Number(card.dataset.price), filters.budget);
+                    const matchesDuration = inRange(Number(card.dataset.days), filters.duration);
+                    const isVisible = matchesType && matchesBudget && matchesDuration;
+
+                    card.hidden = ! isVisible;
+
+                    if (isVisible) {
+                        visibleCount++;
+                    }
+                });
+
+                if (packageEmpty) {
+                    packageEmpty.classList.toggle('hidden', visibleCount > 0);
+                }
+            };
+
+            packageFilters.forEach((filter) => {
+                filter.addEventListener('change', applyPackageFilters);
+            });
+        }
+    });
+
+    document.querySelectorAll('[data-custom-form]').forEach((form) => {
+        const steps = Array.from(form.querySelectorAll('[data-custom-step]'));
+        const root = form.closest('[data-booknow-tabs]') ?? document;
+        const indicators = root.querySelectorAll('[data-custom-step-indicator]');
+        const backButton = form.querySelector('[data-custom-back]');
+        const nextButton = form.querySelector('[data-custom-next]');
+        const submitButton = form.querySelector('[data-custom-submit]');
+
+        if (steps.length === 0 || ! backButton || ! nextButton || ! submitButton) {
+            return;
+        }
+
+        const totalSteps = steps.length;
+        let currentStep = Math.min(Math.max(Number(form.dataset.customStartStep) || 1, 1), totalSteps);
+
+        const renderStep = () => {
+            steps.forEach((step) => {
+                step.hidden = Number(step.dataset.customStep) !== currentStep;
+            });
+
+            indicators.forEach((indicator) => {
+                const stepNumber = Number(indicator.dataset.customStepIndicator);
+                const circle = indicator.querySelector('[data-custom-step-circle]');
+                const isReached = stepNumber <= currentStep;
+
+                indicator.classList.toggle('text-primary', isReached);
+                indicator.classList.toggle('text-muted-foreground', ! isReached);
+
+                if (circle) {
+                    circle.classList.toggle('border-primary', isReached);
+                    circle.classList.toggle('bg-primary', isReached);
+                    circle.classList.toggle('text-primary-foreground', isReached);
+                    circle.classList.toggle('border-border', ! isReached);
+                    circle.classList.toggle('bg-background', ! isReached);
+                }
+            });
+
+            backButton.hidden = currentStep === 1;
+            nextButton.hidden = currentStep === totalSteps;
+            submitButton.hidden = currentStep !== totalSteps;
+        };
+
+        const isCurrentStepValid = () => {
+            const activeStep = steps.find((step) => Number(step.dataset.customStep) === currentStep);
+
+            if (! activeStep) {
+                return true;
+            }
+
+            const fields = activeStep.querySelectorAll('input, select, textarea');
+
+            for (const field of fields) {
+                if (! field.checkValidity()) {
+                    field.reportValidity();
+
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        nextButton.addEventListener('click', () => {
+            if (! isCurrentStepValid()) {
+                return;
+            }
+
+            if (currentStep < totalSteps) {
+                currentStep++;
+                renderStep();
+            }
+        });
+
+        backButton.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                renderStep();
+            }
+        });
+
+        renderStep();
+    });
 
     if (testimonialSlides.length > 0) {
         let activeTestimonialSlide = 0;
