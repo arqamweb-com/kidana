@@ -49,6 +49,12 @@ class Package extends Model
     public array $translatable = [
         'name',
         'description',
+        'location_label',
+        'highlights',
+        'itinerary',
+        'included_items',
+        'excluded_items',
+        'gallery',
     ];
 
     /**
@@ -66,11 +72,9 @@ class Package extends Model
             'end_date' => 'date',
             'price' => 'integer',
             'order_action' => PackageOrderAction::class,
-            'included_items' => 'array',
-            'excluded_items' => 'array',
-            'highlights' => 'array',
-            'itinerary' => 'array',
-            'gallery' => 'array',
+            // NOTE: included_items, excluded_items, highlights, itinerary and gallery are
+            // translatable (see $translatable) — Spatie handles their JSON, so they must
+            // NOT have an 'array' cast here or reading breaks.
         ];
     }
 

@@ -111,9 +111,11 @@ class PackageImporter extends Importer
             return;
         }
 
-        foreach (['name', 'description'] as $attribute) {
-            if (filled($this->data[$attribute] ?? null)) {
-                $this->record->setTranslation($attribute, $locale, (string) $this->data[$attribute]);
+        // Non-base locale: only add translations for the translatable attributes,
+        // keeping shared columns and other languages untouched.
+        foreach (Package::make()->getTranslatableAttributes() as $attribute) {
+            if (array_key_exists($attribute, $this->data) && filled($this->data[$attribute])) {
+                $this->record->setTranslation($attribute, $locale, $this->data[$attribute]);
             }
         }
     }
@@ -179,12 +181,13 @@ class PackageImporter extends Importer
             return null;
         }
 
-        return array_map(static fn (string $title, int $index): array => [
-            'day_label' => 'Day '.($index + 1),
+        // day_label left blank so the front-end uses its own localized "Day N" fallback.
+        return array_map(static fn (string $title): array => [
+            'day_label' => '',
             'icon' => 'heroicon-o-map-pin',
             'title' => $title,
             'description' => '',
-        ], $items, array_keys($items));
+        ], $items);
     }
 
     /**
