@@ -11,18 +11,27 @@ test('active package show page is accessible by slug', function () {
     $package = Package::factory()->create([
         'name' => 'Grand Umrah Program',
         'slug' => 'grand-umrah-program',
-        'description' => 'Premium 10-day journey with guided activities.',
+        'description' => '<p><strong>Premium</strong> 10-day journey with guided activities.</p>',
         'features' => ['Visa support', 'Airport transfer'],
+        'gallery' => [
+            [
+                'image' => 'packages/gallery/grand-umrah.jpg',
+                'caption' => 'Grand Umrah gallery image',
+            ],
+        ],
         'is_active' => true,
     ]);
 
     $response = $this->get(route('packages.show', ['package' => $package->slug]));
 
     $response->assertSuccessful();
+    $response->assertSee('min-h-[max(500px,68vh)]', false);
+    $response->assertDontSee('h-[68vh]', false);
     $response->assertSee('Grand Umrah Program');
     $response->assertSee('aria-label="Breadcrumb"', false);
     $response->assertSee(route('packages'), false);
-    $response->assertSee('Premium 10-day journey with guided activities.');
+    $response->assertSee('<p><strong>Premium</strong> 10-day journey with guided activities.</p>', false);
+    $response->assertDontSee('&lt;strong&gt;Premium&lt;/strong&gt;', false);
     $response->assertSee('Visa support');
     $response->assertSee(route('packages.search'), false);
 });
@@ -84,6 +93,29 @@ test('package show page displays package gallery images', function () {
     $response->assertSee('Hotel stay');
 });
 
+test('package show page hides gallery section when package has no gallery images', function () {
+    $package = Package::factory()->create([
+        'name' => 'No Gallery Package',
+        'slug' => 'no-gallery-package',
+        'features' => ['Hidden gallery section feature'],
+        'gallery' => [
+            [
+                'image' => '',
+                'caption' => 'Empty image row',
+            ],
+        ],
+        'image_url' => 'packages/main-image.jpg',
+        'is_active' => true,
+    ]);
+
+    $response = $this->get(route('packages.show', ['package' => $package->slug]));
+
+    $response->assertSuccessful();
+    $response->assertDontSee('data-package-gallery', false);
+    $response->assertDontSee('Hidden gallery section feature');
+    $response->assertDontSee('Empty image row');
+});
+
 test('package show page displays package itinerary items', function () {
     $package = Package::factory()->create([
         'name' => 'Itinerary Package',
@@ -116,6 +148,38 @@ test('package show page displays package itinerary items', function () {
     $response->assertSee('Meet the guide and transfer to the hotel.');
     $response->assertSee('Day 2');
     $response->assertSee('Umrah Rituals');
+    $response->assertSee('Perform Umrah with guided support.');
+});
+
+test('package show page only renders itinerary accordion panels for items with descriptions', function () {
+    $package = Package::factory()->create([
+        'name' => 'Partial Itinerary Package',
+        'slug' => 'partial-itinerary-package',
+        'itinerary' => [
+            [
+                'day_label' => 'Day 1',
+                'icon' => 'heroicon-o-map',
+                'title' => 'Arrival only',
+                'description' => '',
+            ],
+            [
+                'day_label' => 'Day 2',
+                'icon' => 'heroicon-o-star',
+                'title' => 'Guided Umrah',
+                'description' => 'Perform Umrah with guided support.',
+            ],
+        ],
+        'is_active' => true,
+    ]);
+
+    $response = $this->get(route('packages.show', ['package' => $package->slug]));
+
+    $response->assertSuccessful();
+    $response->assertSee('Arrival only');
+    $response->assertDontSee('package-itinerary-panel-1', false);
+    $response->assertDontSee('package-itinerary-trigger-1', false);
+    $response->assertSee('package-itinerary-panel-2', false);
+    $response->assertSee('package-itinerary-trigger-2', false);
     $response->assertSee('Perform Umrah with guided support.');
 });
 
@@ -170,6 +234,50 @@ test('package show page displays package included excluded and highlight items',
     $response->assertSee('Personalized support');
 });
 
+test('package show page hides empty dashboard detail sections after overview', function () {
+    $package = Package::factory()->create([
+        'name' => 'Empty Details Package',
+        'slug' => 'empty-details-package',
+        'description' => 'This package still has an overview.',
+        'itinerary' => [
+            [
+                'day_label' => '',
+                'icon' => 'heroicon-o-map',
+                'title' => '',
+                'description' => '',
+            ],
+        ],
+        'included_items' => [
+            [
+                'icon' => 'heroicon-o-check',
+                'title' => '',
+            ],
+        ],
+        'excluded_items' => [],
+        'highlights' => [
+            [
+                'icon' => 'heroicon-o-star',
+                'title' => '',
+            ],
+        ],
+        'is_active' => true,
+    ]);
+
+    $response = $this->get(route('packages.show', ['package' => $package->slug]));
+
+    $response->assertSuccessful();
+    $response->assertSee(__('packages.show.overview_title'));
+    $response->assertSee('This package still has an overview.');
+    $response->assertDontSee(__('packages.show.itinerary_title'));
+    $response->assertDontSee(__('packages.show.itinerary_empty_title'));
+    $response->assertDontSee(__('packages.show.included_title'));
+    $response->assertDontSee(__('packages.show.included_empty'));
+    $response->assertDontSee(__('packages.show.excluded_title'));
+    $response->assertDontSee(__('packages.show.excluded_empty'));
+    $response->assertDontSee(__('packages.show.highlights_title'));
+    $response->assertDontSee(__('packages.show.highlights_empty_title'));
+});
+
 test('package show page displays active package faqs in an accordion', function () {
     $package = Package::factory()->create([
         'name' => 'FAQ Package',
@@ -201,6 +309,21 @@ test('package show page displays active package faqs in an accordion', function 
     $response->assertSee('Yes, our team can tailor the package details.');
     $response->assertDontSee('Hidden package question');
     $response->assertDontSee('This should not be visible.');
+});
+
+test('package show page hides faq section when package has no faqs', function () {
+    $package = Package::factory()->create([
+        'name' => 'No Questions Package',
+        'slug' => 'no-questions-package',
+        'is_active' => true,
+    ]);
+
+    $response = $this->get(route('packages.show', ['package' => $package->slug]));
+
+    $response->assertSuccessful();
+    $response->assertDontSee(__('packages.show.faq_eyebrow'));
+    $response->assertDontSee(__('packages.show.faq_title'));
+    $response->assertDontSee('No FAQs available yet');
 });
 
 test('packages page links each package to package show page', function () {

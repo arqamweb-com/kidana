@@ -82,7 +82,24 @@ class PackageCsvExporter
         foreach (self::LIST_COLUMNS as $column) {
             $value = $package->getAttribute($column);
 
-            $row[] = is_array($value) ? implode(' | ', $value) : (string) ($value ?? '');
+            if (! is_array($value)) {
+                $row[] = (string) ($value ?? '');
+
+                continue;
+            }
+
+            // Repeater-backed columns store rows of arrays (e.g. {icon, title} or {image, caption}).
+            // Flatten each row to its human-readable value so export never fails on nested arrays.
+            $row[] = collect($value)
+                ->map(static function ($item): string {
+                    if (is_array($item)) {
+                        return (string) (data_get($item, 'title') ?? data_get($item, 'image') ?? '');
+                    }
+
+                    return (string) $item;
+                })
+                ->filter()
+                ->implode(' | ');
         }
 
         return $row;

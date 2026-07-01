@@ -25,6 +25,9 @@
         $highlightItems = collect($package->highlights ?? [])
             ->filter(fn($item): bool => filled(data_get($item, 'title')))
             ->values();
+        $faqItems = collect($package->faqs ?? [])
+            ->filter(fn($faq): bool => filled($faq->title) || filled($faq->answer))
+            ->values();
         $resolveImageUrl = static function (?string $imagePath, string $fallback): string {
             if (blank($imagePath)) {
                 return $fallback;
@@ -50,11 +53,7 @@
             $package->order_action === \App\Enum\PackageOrderAction::FawryPayment
                 ? __('packages.show.pay_now')
                 : __('packages.show.book_now');
-        $displayGalleryImages = $galleryImages->isNotEmpty()
-            ? $galleryImages
-            : collect([['image' => $package->image_url, 'caption' => $package->name]])
-                ->filter(fn($item): bool => filled(data_get($item, 'image')))
-                ->values();
+        $displayGalleryImages = $galleryImages;
         $featuredGalleryImage = $displayGalleryImages->first();
         $thumbnailGalleryImages = $displayGalleryImages->take(4)->values();
         $renderPackageIcon = static function (?string $icon): string {
@@ -68,12 +67,13 @@
         };
     @endphp
     <div class="min-h-screen">
-        <section class="relative h-[68vh] min-h-[500px] flex items-end overflow-hidden"><img src="{{ $packageImageUrl }}"
+        <section class="relative flex min-h-[max(500px,68vh)] items-end overflow-hidden"><img src="{{ $packageImageUrl }}"
                 alt="{{ $package->name }}" class="absolute inset-0 w-full h-full object-cover scale-105">
             <div
                 class="absolute inset-0 bg-gradient-to-b from-[hsl(var(--hero-overlay))]/70 via-[hsl(var(--hero-overlay))]/40 to-[hsl(var(--hero-overlay))]/95">
             </div>
-            <div class="relative z-10 container mx-auto px-4 md:px-8 pb-16 text-primary-foreground animate-fade-in-up">
+            <div
+                class="relative z-10 container mx-auto px-4 pb-12 pt-32 text-primary-foreground animate-fade-in-up md:px-8 md:pb-16 md:pt-40">
                 <x-breadcrumbs variant="overlay" align="center" class="mb-6" :items="[['label' => __('nav.packages'), 'url' => route('packages')], ['label' => $package->name]]" />
                 <div class="flex flex-wrap gap-2 mb-5">
                     <div
@@ -96,7 +96,7 @@
 
                 @if (filled($package->description))
                     <p class="text-primary-foreground/85 text-base md:text-lg max-w-2xl mb-7">
-                        {{ \Illuminate\Support\Str::words($package->description, 10, '...') }}
+                        {{ \Illuminate\Support\Str::words(strip_tags((string) $package->description), 10, '...') }}
                     </p>
                 @endif
 
@@ -239,94 +239,96 @@
                 </div>
             </div>
         </section>
-        <section class="section-padding bg-background">
-            <div class="container mx-auto max-w-6xl">
-                @if ($features->isNotEmpty())
-                    <div class="mb-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        @foreach ($features as $feature)
-                            <div class="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
-                                <div class="flex items-start gap-3">
-                                    <span
-                                        class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M20 6 9 17l-5-5"></path>
-                                        </svg>
-                                    </span>
-                                    <p class="text-sm font-semibold leading-6 text-foreground">{{ $feature }}</p>
+        @if ($displayGalleryImages->isNotEmpty())
+            <section class="section-padding bg-background">
+                <div class="container mx-auto max-w-6xl">
+                    @if ($features->isNotEmpty())
+                        <div class="mb-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            @foreach ($features as $feature)
+                                <div class="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+                                    <div class="flex items-start gap-3">
+                                        <span
+                                            class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M20 6 9 17l-5-5"></path>
+                                            </svg>
+                                        </span>
+                                        <p class="text-sm font-semibold leading-6 text-foreground">{{ $feature }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @if ($featuredGalleryImage)
+                        @php
+                            $featuredGalleryImageUrl = $resolveImageUrl(
+                                data_get($featuredGalleryImage, 'image'),
+                                $packageImageUrl,
+                            );
+                            $featuredGalleryImageCaption = data_get($featuredGalleryImage, 'caption');
+                        @endphp
+
+                        <div data-package-gallery class="grid gap-4 md:gap-6 lg:grid-cols-[2fr_1fr]">
+                            <div class="group relative overflow-hidden rounded-3xl">
+                                <img data-package-gallery-featured src="{{ $featuredGalleryImageUrl }}"
+                                    alt="{{ $featuredGalleryImageCaption ?: __('packages.show.gallery_image_alt', ['package' => $package->name, 'number' => 1]) }}"
+                                    class="aspect-[16/10] h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
+
+                                <div data-package-gallery-caption-wrapper
+                                    class="{{ filled($featuredGalleryImageCaption) ? '' : 'hidden' }} absolute inset-x-0 bottom-0 bg-gradient-to-t from-secondary/80 to-transparent p-6 pt-16">
+                                    <p data-package-gallery-caption class="text-sm font-semibold text-primary-foreground">
+                                        {{ $featuredGalleryImageCaption }}
+                                    </p>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-                @endif
 
-                @if ($featuredGalleryImage)
-                    @php
-                        $featuredGalleryImageUrl = $resolveImageUrl(
-                            data_get($featuredGalleryImage, 'image'),
-                            $packageImageUrl,
-                        );
-                        $featuredGalleryImageCaption = data_get($featuredGalleryImage, 'caption');
-                    @endphp
+                            @if ($thumbnailGalleryImages->count() > 1)
+                                <div class="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-1">
+                                    @foreach ($thumbnailGalleryImages as $galleryImage)
+                                        @php
+                                            $galleryImageUrl = $resolveImageUrl(
+                                                data_get($galleryImage, 'image'),
+                                                $packageImageUrl,
+                                            );
+                                            $galleryImageCaption = data_get($galleryImage, 'caption');
+                                            $galleryImageAlt =
+                                                $galleryImageCaption ?:
+                                                __('packages.show.gallery_image_alt', [
+                                                    'package' => $package->name,
+                                                    'number' => $loop->iteration,
+                                                ]);
+                                        @endphp
 
-                    <div data-package-gallery class="grid gap-4 md:gap-6 lg:grid-cols-[2fr_1fr]">
-                        <div class="group relative overflow-hidden rounded-3xl">
-                            <img data-package-gallery-featured src="{{ $featuredGalleryImageUrl }}"
-                                alt="{{ $featuredGalleryImageCaption ?: __('packages.show.gallery_image_alt', ['package' => $package->name, 'number' => 1]) }}"
-                                class="aspect-[16/10] h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                        <button type="button" data-package-gallery-thumbnail
+                                            data-package-gallery-src="{{ $galleryImageUrl }}"
+                                            data-package-gallery-alt="{{ $galleryImageAlt }}"
+                                            data-package-gallery-caption="{{ $galleryImageCaption }}"
+                                            class="group relative overflow-hidden rounded-2xl transition-all {{ $loop->first ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'ring-0 ring-transparent ring-offset-0' }}"
+                                            aria-label="{{ __('packages.show.view_image', ['number' => $loop->iteration]) }}"
+                                            aria-pressed="{{ $loop->first ? 'true' : 'false' }}">
+                                            <img src="{{ $galleryImageUrl }}" alt="{{ $galleryImageAlt }}" loading="lazy"
+                                                class="aspect-[4/3] h-full w-full object-cover transition-transform duration-700 group-hover:scale-110">
 
-                            <div data-package-gallery-caption-wrapper
-                                class="{{ filled($featuredGalleryImageCaption) ? '' : 'hidden' }} absolute inset-x-0 bottom-0 bg-gradient-to-t from-secondary/80 to-transparent p-6 pt-16">
-                                <p data-package-gallery-caption class="text-sm font-semibold text-primary-foreground">
-                                    {{ $featuredGalleryImageCaption }}
-                                </p>
-                            </div>
+                                            @if (filled($galleryImageCaption))
+                                                <div
+                                                    class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-secondary/75 to-transparent p-4 pt-10">
+                                                    <p class="text-xs font-semibold text-primary-foreground">
+                                                        {{ $galleryImageCaption }}
+                                                    </p>
+                                                </div>
+                                            @endif
+                                        </button>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
-
-                        @if ($thumbnailGalleryImages->count() > 1)
-                            <div class="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-1">
-                                @foreach ($thumbnailGalleryImages as $galleryImage)
-                                    @php
-                                        $galleryImageUrl = $resolveImageUrl(
-                                            data_get($galleryImage, 'image'),
-                                            $packageImageUrl,
-                                        );
-                                        $galleryImageCaption = data_get($galleryImage, 'caption');
-                                        $galleryImageAlt =
-                                            $galleryImageCaption ?:
-                                            __('packages.show.gallery_image_alt', [
-                                                'package' => $package->name,
-                                                'number' => $loop->iteration,
-                                            ]);
-                                    @endphp
-
-                                    <button type="button" data-package-gallery-thumbnail
-                                        data-package-gallery-src="{{ $galleryImageUrl }}"
-                                        data-package-gallery-alt="{{ $galleryImageAlt }}"
-                                        data-package-gallery-caption="{{ $galleryImageCaption }}"
-                                        class="group relative overflow-hidden rounded-2xl transition-all {{ $loop->first ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'ring-0 ring-transparent ring-offset-0' }}"
-                                        aria-label="{{ __('packages.show.view_image', ['number' => $loop->iteration]) }}"
-                                        aria-pressed="{{ $loop->first ? 'true' : 'false' }}">
-                                        <img src="{{ $galleryImageUrl }}" alt="{{ $galleryImageAlt }}" loading="lazy"
-                                            class="aspect-[4/3] h-full w-full object-cover transition-transform duration-700 group-hover:scale-110">
-
-                                        @if (filled($galleryImageCaption))
-                                            <div
-                                                class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-secondary/75 to-transparent p-4 pt-10">
-                                                <p class="text-xs font-semibold text-primary-foreground">
-                                                    {{ $galleryImageCaption }}
-                                                </p>
-                                            </div>
-                                        @endif
-                                    </button>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                @endif
-            </div>
-        </section>
+                    @endif
+                </div>
+            </section>
+        @endif
         <section class="bg-muted/40">
             <div class="container mx-auto max-w-6xl px-4 md:px-8 py-16 md:py-24">
                 <div class="grid lg:grid-cols-[1fr_380px] gap-10">
@@ -336,19 +338,19 @@
                                 {{ __('packages.show.overview_eyebrow') }}</p>
                             <h2 class="text-2xl md:text-4xl font-bold text-foreground mb-6 leading-tight">
                                 {{ __('packages.show.overview_title') }}</h2>
-                            <p class="text-muted-foreground text-base md:text-lg leading-relaxed">
-                                {{ $package->description }}</p>
+                            <div class="text-muted-foreground text-base md:text-lg leading-relaxed">
+                                {!! $package->description !!}
+                            </div>
                         </div>
-                        <div class="animate-fade-in-up">
-                            <p class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-3">
-                                {{ __('packages.show.itinerary_eyebrow') }}</p>
-                            <h2 class="text-2xl md:text-4xl font-bold text-foreground mb-6 leading-tight">
-                                {{ __('packages.show.itinerary_title') }}</h2>
-                            @if ($itineraryItems->isNotEmpty())
+                        @if ($itineraryItems->isNotEmpty())
+                            <div class="animate-fade-in-up">
+                                <p class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-3">
+                                    {{ __('packages.show.itinerary_eyebrow') }}</p>
+                                <h2 class="text-2xl md:text-4xl font-bold text-foreground mb-6 leading-tight">
+                                    {{ __('packages.show.itinerary_title') }}</h2>
                                 <div class="space-y-3" data-package-accordion>
                                     @foreach ($itineraryItems as $itineraryItem)
                                         @php
-                                            $isOpen = $loop->first;
                                             $triggerId = 'package-itinerary-trigger-' . $loop->iteration;
                                             $panelId = 'package-itinerary-panel-' . $loop->iteration;
                                             $dayLabel =
@@ -356,124 +358,134 @@
                                                 __('packages.show.day', ['number' => $loop->iteration]);
                                             $title = data_get($itineraryItem, 'title') ?: $dayLabel;
                                             $description = data_get($itineraryItem, 'description');
+                                            $hasDescription = filled($description);
+                                            $isOpen = $loop->first && $hasDescription;
                                         @endphp
 
                                         <div data-package-accordion-item data-state="{{ $isOpen ? 'open' : 'closed' }}"
                                             class="bg-card rounded-2xl border border-border/60 px-6 shadow-sm">
                                             <h3 class="flex">
-                                                <button type="button" id="{{ $triggerId }}"
-                                                    aria-controls="{{ $panelId }}"
-                                                    aria-expanded="{{ $isOpen ? 'true' : 'false' }}"
-                                                    data-package-accordion-trigger
-                                                    data-state="{{ $isOpen ? 'open' : 'closed' }}"
-                                                    class="flex flex-1 items-center justify-between gap-4 py-5 text-left font-medium transition-all hover:no-underline">
-                                                    <div class="flex items-center gap-4">
-                                                        <div
-                                                            class="shrink-0 w-12 h-12 rounded-xl bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
-                                                            {!! $renderPackageIcon(data_get($itineraryItem, 'icon')) !!}
+                                                @if ($hasDescription)
+                                                    <button type="button" id="{{ $triggerId }}"
+                                                        aria-controls="{{ $panelId }}"
+                                                        aria-expanded="{{ $isOpen ? 'true' : 'false' }}"
+                                                        data-package-accordion-trigger
+                                                        data-state="{{ $isOpen ? 'open' : 'closed' }}"
+                                                        class="flex flex-1 items-center justify-between gap-4 py-5 text-left font-medium transition-all hover:no-underline">
+                                                        <div class="flex items-center gap-4">
+                                                            <div
+                                                                class="shrink-0 w-12 h-12 rounded-xl bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
+                                                                {!! $renderPackageIcon(data_get($itineraryItem, 'icon')) !!}
+                                                            </div>
+                                                            <div>
+                                                                <p
+                                                                    class="text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">
+                                                                    {{ $dayLabel }}
+                                                                </p>
+                                                                <p class="text-base md:text-lg font-bold text-foreground">
+                                                                    {{ $title }}
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <p
-                                                                class="text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">
-                                                                {{ $dayLabel }}
-                                                            </p>
-                                                            <p class="text-base md:text-lg font-bold text-foreground">
-                                                                {{ $title }}
-                                                            </p>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                            height="24" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            class="h-4 w-4 shrink-0 transition-transform duration-200 {{ $isOpen ? 'rotate-180' : '' }}">
+                                                            <path d="m6 9 6 6 6-6"></path>
+                                                        </svg>
+                                                    </button>
+                                                @else
+                                                    <div
+                                                        class="flex flex-1 items-center justify-between gap-4 py-5 text-left font-medium">
+                                                        <div class="flex items-center gap-4">
+                                                            <div
+                                                                class="shrink-0 w-12 h-12 rounded-xl bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
+                                                                {!! $renderPackageIcon(data_get($itineraryItem, 'icon')) !!}
+                                                            </div>
+                                                            <div>
+                                                                <p
+                                                                    class="text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">
+                                                                    {{ $dayLabel }}
+                                                                </p>
+                                                                <p class="text-base md:text-lg font-bold text-foreground">
+                                                                    {{ $title }}
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                                        class="h-4 w-4 shrink-0 transition-transform duration-200 {{ $isOpen ? 'rotate-180' : '' }}">
-                                                        <path d="m6 9 6 6 6-6"></path>
-                                                    </svg>
-                                                </button>
+                                                @endif
                                             </h3>
-                                            <div id="{{ $panelId }}" role="region"
-                                                aria-labelledby="{{ $triggerId }}" data-package-accordion-panel
-                                                data-state="{{ $isOpen ? 'open' : 'closed' }}"
-                                                class="{{ $isOpen ? '' : 'hidden' }} border-t border-border/60 pb-6 pt-5 text-sm leading-relaxed text-muted-foreground md:text-base">
-                                                {{ $description }}
-                                            </div>
+                                            @if ($hasDescription)
+                                                <div id="{{ $panelId }}" role="region"
+                                                    aria-labelledby="{{ $triggerId }}" data-package-accordion-panel
+                                                    data-state="{{ $isOpen ? 'open' : 'closed' }}"
+                                                    class="{{ $isOpen ? '' : 'hidden' }} border-t border-border/60 pb-6 pt-5 text-sm leading-relaxed text-muted-foreground md:text-base">
+                                                    {{ $description }}
+                                                </div>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>
-                            @else
-                                <div
-                                    class="rounded-3xl border border-dashed border-border/70 bg-card px-8 py-12 text-center">
-                                    <h3 class="text-2xl font-bold text-foreground">
-                                        {{ __('packages.show.itinerary_empty_title') }}</h3>
-                                    <p
-                                        class="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                                        {{ __('packages.show.itinerary_empty_description') }}
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="grid md:grid-cols-2 gap-6 animate-fade-in-up">
-                            <div class="bg-card rounded-2xl p-7 border border-border/60 shadow-sm">
-                                <h3 class="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
-                                    {!! $renderPackageIcon('heroicon-o-check') !!}
-                                    {{ __('packages.show.included_title') }}
-                                </h3>
-
-                                @if ($includedItems->isNotEmpty())
-                                    <ul class="space-y-3">
-                                        @foreach ($includedItems as $includedItem)
-                                            <li class="flex items-start gap-3">
-                                                <div
-                                                    class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                                                    {!! $renderPackageIcon(data_get($includedItem, 'icon')) !!}
-                                                </div>
-                                                <span class="text-sm text-foreground leading-relaxed pt-1">
-                                                    {{ data_get($includedItem, 'title') }}
-                                                </span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @else
-                                    <p class="text-sm leading-relaxed text-muted-foreground">
-                                        {{ __('packages.show.included_empty') }}
-                                    </p>
-                                @endif
                             </div>
+                        @endif
 
-                            <div class="bg-card rounded-2xl p-7 border border-border/60 shadow-sm">
-                                <h3 class="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
-                                    {!! $renderPackageIcon('heroicon-o-x-mark') !!}
-                                    {{ __('packages.show.excluded_title') }}
-                                </h3>
+                        @if ($includedItems->isNotEmpty() || $excludedItems->isNotEmpty())
+                            <div class="grid md:grid-cols-2 gap-6 animate-fade-in-up">
+                                @if ($includedItems->isNotEmpty())
+                                    <div class="bg-card rounded-2xl p-7 border border-border/60 shadow-sm">
+                                        <h3 class="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
+                                            {!! $renderPackageIcon('heroicon-o-check') !!}
+                                            {{ __('packages.show.included_title') }}
+                                        </h3>
+
+                                        <ul class="space-y-3">
+                                            @foreach ($includedItems as $includedItem)
+                                                <li class="flex items-start gap-3">
+                                                    <div
+                                                        class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                                        {!! $renderPackageIcon(data_get($includedItem, 'icon')) !!}
+                                                    </div>
+                                                    <span class="text-sm text-foreground leading-relaxed pt-1">
+                                                        {{ data_get($includedItem, 'title') }}
+                                                    </span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
 
                                 @if ($excludedItems->isNotEmpty())
-                                    <ul class="space-y-3">
-                                        @foreach ($excludedItems as $excludedItem)
-                                            <li class="flex items-start gap-3">
-                                                <div
-                                                    class="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                                                    {!! $renderPackageIcon(data_get($excludedItem, 'icon')) !!}
-                                                </div>
-                                                <span class="text-sm text-muted-foreground leading-relaxed pt-1">
-                                                    {{ data_get($excludedItem, 'title') }}
-                                                </span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @else
-                                    <p class="text-sm leading-relaxed text-muted-foreground">
-                                        {{ __('packages.show.excluded_empty') }}
-                                    </p>
+                                    <div class="bg-card rounded-2xl p-7 border border-border/60 shadow-sm">
+                                        <h3 class="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
+                                            {!! $renderPackageIcon('heroicon-o-x-mark') !!}
+                                            {{ __('packages.show.excluded_title') }}
+                                        </h3>
+
+                                        <ul class="space-y-3">
+                                            @foreach ($excludedItems as $excludedItem)
+                                                <li class="flex items-start gap-3">
+                                                    <div
+                                                        class="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                                                        {!! $renderPackageIcon(data_get($excludedItem, 'icon')) !!}
+                                                    </div>
+                                                    <span class="text-sm text-muted-foreground leading-relaxed pt-1">
+                                                        {{ data_get($excludedItem, 'title') }}
+                                                    </span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
                                 @endif
                             </div>
-                        </div>
+                        @endif
 
-                        <div>
-                            <p class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-3">
-                                {{ __('packages.show.highlights_eyebrow') }}</p>
-                            <h2 class="text-2xl md:text-4xl font-bold text-foreground mb-6 leading-tight">
-                                {{ __('packages.show.highlights_title') }}</h2>
-
-                            @if ($highlightItems->isNotEmpty())
+                        @if ($highlightItems->isNotEmpty())
+                            <div>
+                                <p class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-3">
+                                    {{ __('packages.show.highlights_eyebrow') }}</p>
+                                <h2 class="text-2xl md:text-4xl font-bold text-foreground mb-6 leading-tight">
+                                    {{ __('packages.show.highlights_title') }}</h2>
                                 <div class="grid sm:grid-cols-2 gap-4">
                                     @foreach ($highlightItems as $highlightItem)
                                         <div
@@ -488,18 +500,8 @@
                                         </div>
                                     @endforeach
                                 </div>
-                            @else
-                                <div
-                                    class="rounded-3xl border border-dashed border-border/70 bg-card px-8 py-12 text-center">
-                                    <h3 class="text-2xl font-bold text-foreground">
-                                        {{ __('packages.show.highlights_empty_title') }}</h3>
-                                    <p
-                                        class="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-                                        {{ __('packages.show.highlights_empty_description') }}
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
+                            </div>
+                        @endif
                     </div>
                     <aside class="lg:sticky lg:top-32 self-start">
                         <div id="pkg-cta"
@@ -638,16 +640,19 @@
                 </div>
             </div>
         </section>
-        <section class="section-padding bg-muted/40">
-            <div class="mx-auto max-w-3xl">
-                <div class="text-center mb-12">
-                    <p class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">
-                        {{ __('packages.show.faq_eyebrow') }}</p>
-                    <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('packages.show.faq_title') }}</h2>
+        @if ($faqItems->isNotEmpty())
+            <section class="section-padding bg-muted/40">
+                <div class="mx-auto max-w-3xl">
+                    <div class="text-center mb-12">
+                        <p class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">
+                            {{ __('packages.show.faq_eyebrow') }}</p>
+                        <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('packages.show.faq_title') }}
+                        </h2>
+                    </div>
+                    @include('sections.faq', ['faqs' => $faqItems])
                 </div>
-                @include('sections.faq', ['faqs' => $package->faqs])
-            </div>
-        </section>
+            </section>
+        @endif
         <section class="relative py-28 overflow-hidden"><img src="#" alt=""
                 class="absolute inset-0 w-full h-full object-cover">
             <div

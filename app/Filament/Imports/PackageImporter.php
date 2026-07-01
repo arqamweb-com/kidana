@@ -58,21 +58,27 @@ class PackageImporter extends Importer
                 ->boolean()
                 ->rules(['nullable', 'boolean']),
 
-            // Array / JSON columns — accept multiple values separated by "|"
+            // Flat list columns (pipe-separated strings)
             ImportColumn::make('features')
                 ->castStateUsing(static fn (?string $state): ?array => self::toList($state)),
             ImportColumn::make('tags')
                 ->castStateUsing(static fn (?string $state): ?array => self::toList($state)),
+
+            // Repeater-backed columns — stored as arrays of {icon, title} to match the form & front-end.
             ImportColumn::make('highlights')
-                ->castStateUsing(static fn (?string $state): ?array => self::toList($state)),
-            ImportColumn::make('itinerary')
-                ->castStateUsing(static fn (?string $state): ?array => self::toList($state)),
+                ->castStateUsing(static fn (?string $state): ?array => self::toIconTitleList($state, 'heroicon-o-star')),
             ImportColumn::make('included_items')
-                ->castStateUsing(static fn (?string $state): ?array => self::toList($state)),
+                ->castStateUsing(static fn (?string $state): ?array => self::toIconTitleList($state, 'heroicon-o-check')),
             ImportColumn::make('excluded_items')
-                ->castStateUsing(static fn (?string $state): ?array => self::toList($state)),
+                ->castStateUsing(static fn (?string $state): ?array => self::toIconTitleList($state, 'heroicon-o-x-mark')),
+
+            // Itinerary — stored as {day_label, icon, title, description}.
+            ImportColumn::make('itinerary')
+                ->castStateUsing(static fn (?string $state): ?array => self::toItinerary($state)),
+
+            // Gallery — stored as {image, caption}.
             ImportColumn::make('gallery')
-                ->castStateUsing(static fn (?string $state): ?array => self::toList($state)),
+                ->castStateUsing(static fn (?string $state): ?array => self::toGallery($state)),
         ];
     }
 
@@ -139,5 +145,64 @@ class PackageImporter extends Importer
             ->filter()
             ->values()
             ->all();
+    }
+
+    /**
+     * Convert a pipe-separated cell into Repeater rows of {icon, title}.
+     *
+     * @return array<int, array<string, string>>|null
+     */
+    protected static function toIconTitleList(?string $state, string $icon): ?array
+    {
+        $items = self::toList($state);
+
+        if ($items === null) {
+            return null;
+        }
+
+        return array_map(static fn (string $title): array => [
+            'icon' => $icon,
+            'title' => $title,
+        ], $items);
+    }
+
+    /**
+     * Convert a pipe-separated cell into itinerary rows of {day_label, icon, title, description}.
+     *
+     * @return array<int, array<string, string>>|null
+     */
+    protected static function toItinerary(?string $state): ?array
+    {
+        $items = self::toList($state);
+
+        if ($items === null) {
+            return null;
+        }
+
+        return array_map(static fn (string $title, int $index): array => [
+            'day_label' => 'Day '.($index + 1),
+            'icon' => 'heroicon-o-map-pin',
+            'title' => $title,
+            'description' => '',
+        ], $items, array_keys($items));
+    }
+
+    /**
+     * Convert a pipe-separated cell of image paths into gallery rows of {image, caption}.
+     *
+     * @return array<int, array<string, string>>|null
+     */
+    protected static function toGallery(?string $state): ?array
+    {
+        $items = self::toList($state);
+
+        if ($items === null) {
+            return null;
+        }
+
+        return array_map(static fn (string $image): array => [
+            'image' => $image,
+            'caption' => '',
+        ], $items);
     }
 }

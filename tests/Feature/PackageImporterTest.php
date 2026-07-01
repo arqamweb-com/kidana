@@ -52,6 +52,47 @@ test('it creates a package from a csv row', function () {
         ->and($package->tags)->toBe(['egypt', 'culture']);
 });
 
+test('it stores repeater-backed columns as structured arrays', function () {
+    Destination::factory()->create();
+
+    $package = importPackageRow([
+        'name' => 'Structured Package',
+        'slug' => 'structured-package',
+        'highlights' => 'Pyramids | Nile Cruise',
+        'included_items' => 'Hotel pickup | Guide',
+        'excluded_items' => 'Tipping',
+        'itinerary' => 'Pickup from hotel | Visit the Pyramids',
+    ]);
+
+    expect($package->highlights)->toBe([
+        ['icon' => 'heroicon-o-star', 'title' => 'Pyramids'],
+        ['icon' => 'heroicon-o-star', 'title' => 'Nile Cruise'],
+    ])
+        ->and($package->included_items)->toBe([
+            ['icon' => 'heroicon-o-check', 'title' => 'Hotel pickup'],
+            ['icon' => 'heroicon-o-check', 'title' => 'Guide'],
+        ])
+        ->and($package->excluded_items)->toBe([
+            ['icon' => 'heroicon-o-x-mark', 'title' => 'Tipping'],
+        ])
+        ->and($package->itinerary)->toBe([
+            ['day_label' => 'Day 1', 'icon' => 'heroicon-o-map-pin', 'title' => 'Pickup from hotel', 'description' => ''],
+            ['day_label' => 'Day 2', 'icon' => 'heroicon-o-map-pin', 'title' => 'Visit the Pyramids', 'description' => ''],
+        ]);
+});
+
+test('it defaults an empty price to zero', function () {
+    Destination::factory()->create();
+
+    $package = importPackageRow([
+        'name' => 'No Price Package',
+        'slug' => 'no-price-package',
+        'price' => '',
+    ]);
+
+    expect($package->price)->toBe(0);
+});
+
 test('it updates an existing package matched by slug', function () {
     $existing = Package::factory()->create([
         'slug' => 'nile-cruise',

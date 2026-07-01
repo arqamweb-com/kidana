@@ -57,6 +57,25 @@ test('array columns round-trip between the exporter and importer', function () {
         ->and($reimported)->toBe($original);
 });
 
+test('it exports repeater-backed columns without failing on nested arrays', function () {
+    $package = Package::factory()->create([
+        'name' => 'Structured Package',
+        'slug' => 'structured-package',
+        'highlights' => [
+            ['icon' => 'heroicon-o-star', 'title' => 'Pyramids'],
+            ['icon' => 'heroicon-o-star', 'title' => 'Nile Cruise'],
+        ],
+        'itinerary' => [
+            ['day_label' => 'Day 1', 'icon' => 'heroicon-o-map-pin', 'title' => 'Pickup', 'description' => ''],
+        ],
+    ]);
+
+    $row = array_combine(PackageCsvExporter::headers(), PackageCsvExporter::row($package));
+
+    expect($row['highlights'])->toBe('Pyramids | Nile Cruise')
+        ->and($row['itinerary'])->toBe('Pickup');
+});
+
 test('the download response streams csv with a bom and header row', function () {
     Package::factory()->create([
         'name' => 'Nile Cruise',

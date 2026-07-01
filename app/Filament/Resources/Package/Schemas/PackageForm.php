@@ -10,6 +10,7 @@ use App\Models\Testimonial;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
@@ -43,7 +44,7 @@ class PackageForm
                                         ->dehydrateStateUsing(SlugGenerator::normalize(...))
                                         ->maxLength(255)
                                         ->unique(ignoreRecord: true),
-                                    Textarea::make('description')
+                                    RichEditor::make('description')
                                         ->label('Description')
                                         ->columnSpanFull(),
                                 ])
@@ -128,7 +129,6 @@ class PackageForm
 
                                     Textarea::make('description')
                                         ->rows(3)
-                                        ->required()
                                         ->columnSpanFull(),
                                 ])
                                 ->reorderable()
