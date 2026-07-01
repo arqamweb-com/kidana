@@ -371,7 +371,7 @@
                                                         aria-expanded="{{ $isOpen ? 'true' : 'false' }}"
                                                         data-package-accordion-trigger
                                                         data-state="{{ $isOpen ? 'open' : 'closed' }}"
-                                                        class="flex flex-1 items-center justify-between gap-4 py-5 text-left font-medium transition-all hover:no-underline">
+                                                        class="flex flex-1 items-center justify-between gap-4 py-5 font-medium transition-all hover:no-underline">
                                                         <div class="flex items-center gap-4">
                                                             <div
                                                                 class="shrink-0 w-12 h-12 rounded-xl bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
