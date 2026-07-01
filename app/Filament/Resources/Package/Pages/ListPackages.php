@@ -2,13 +2,18 @@
 
 namespace App\Filament\Resources\Package\Pages;
 
+use App\Filament\Imports\PackageImporter;
 use App\Filament\Resources\Package\PackageResource;
+use App\Services\PackageCsvExporter;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
+use Illuminate\Database\Eloquent\Builder;
 use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 use LaraZeus\SpatieTranslatable\Resources\Pages\ListRecords\Concerns\Translatable;
-use Illuminate\Database\Eloquent\Builder;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ListPackages extends ListRecords
 {
@@ -20,6 +25,18 @@ class ListPackages extends ListRecords
     {
         return [
             LocaleSwitcher::make(),
+            ImportAction::make()
+                ->importer(PackageImporter::class)
+                ->csvDelimiter(',')
+                ->options(fn (): array => ['locale' => $this->activeLocale]),
+            Action::make('export')
+                ->label('Export')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->action(fn (): StreamedResponse => app(PackageCsvExporter::class)->download(
+                    $this->getFilteredTableQuery(),
+                    'packages-'.now()->format('Y-m-d_His').'.csv',
+                )),
             CreateAction::make(),
         ];
     }
@@ -30,10 +47,10 @@ class ListPackages extends ListRecords
             'all' => Tab::make()->icon('heroicon-m-bars-4'),
             'active' => Tab::make()
                 ->icon('heroicon-m-eye')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_active', true)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('is_active', true)),
             'inactive' => Tab::make()
                 ->icon('heroicon-m-eye-slash')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_active', false)),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('is_active', false)),
         ];
     }
 
