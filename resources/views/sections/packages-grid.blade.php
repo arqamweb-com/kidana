@@ -139,10 +139,10 @@
                                 @endif
                             </div>
 
-                            @if($package->description)
-                                <p class="mb-6 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                                    {{ $package->description }}
-                                </p>
+                            @if ($package->description)
+                                <div class="mb-6 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                                    {!! $package->description !!}
+                                </div>
                             @endif
 
                             <a href="{{ route('packages.show', ['package' => $package->slug]) }}"

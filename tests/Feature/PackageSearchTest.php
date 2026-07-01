@@ -126,6 +126,20 @@ test('packages page displays active packages only', function () {
     $response->assertDontSee('Inactive Hidden Package');
 });
 
+test('packages grid renders rich editor package descriptions as html', function () {
+    Package::factory()->create([
+        'name' => 'Rich Description Package',
+        'description' => '<p><strong>Curated</strong> package details.</p>',
+        'is_active' => true,
+    ]);
+
+    $response = $this->get(route('packages'));
+
+    $response->assertSuccessful();
+    $response->assertSee('<p><strong>Curated</strong> package details.</p>', false);
+    $response->assertDontSee('&lt;strong&gt;Curated&lt;/strong&gt;', false);
+});
+
 test('packages page renders arabic static copy', function () {
     $response = $this->get('/ar/packages');
 
