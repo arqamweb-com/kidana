@@ -34,7 +34,7 @@ class HomeController extends Controller
                 ->active()
                 ->orderBy('sort_order')
                 ->orderBy("name->{$locale}")
-                ->limit(4)
+                ->limit(6)
                 ->get(),
             'homeFaqs' => Faq::query()
                 ->active()

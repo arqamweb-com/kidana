@@ -12,6 +12,9 @@ test('umrah plus page renders with local assets and functional content', functio
     $response->assertSee('Can I choose any destination before Umrah?');
     $response->assertSee('kidana-home-assets/kaaba-umrah.jpg');
     $response->assertSee('kidana-home-assets/umrah-plus-egypt.jpg');
+    expect(substr_count($response->getContent(), 'container mx-auto max-w-6xl'))->toBeGreaterThanOrEqual(9);
+    $response->assertSee('mx-auto max-w-4xl text-center', false);
+    $response->assertSee('mx-auto max-w-3xl text-center', false);
     $response->assertDontSee('src="/assets', false);
     $response->assertDontSee('radix-', false);
 });

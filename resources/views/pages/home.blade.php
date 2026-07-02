@@ -212,7 +212,7 @@
                         </svg>
                     </div>
                     <p class="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-2">{{ __('home.trust.tourism_license') }}</p>
-                    <p class="text-lg font-bold text-foreground">XXXXX</p>
+                    <p class="text-lg font-bold text-foreground">1908</p>
                 </div>
                 <div
                     class="bg-card rounded-2xl p-7 border border-border/50 text-center hover:border-primary/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 animate-fade-in-up"
@@ -229,7 +229,7 @@
                     </div>
                     <p class="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-2">
                         {{ __('home.trust.commercial_registration') }}</p>
-                    <p class="text-lg font-bold text-foreground">XXXXX</p>
+                    <p class="text-lg font-bold text-foreground">200294</p>
                 </div>
                 <div
                     class="bg-card rounded-2xl p-7 border border-border/50 text-center hover:border-primary/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 animate-fade-in-up"
@@ -247,7 +247,7 @@
                     </div>
                     <p class="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-2">{{ __('home.trust.tax_id') }}
                     </p>
-                    <p class="text-lg font-bold text-foreground">XXXXX</p>
+                    <p class="text-lg font-bold text-foreground">332-719-936</p>
                 </div>
             </div>
         </div>
@@ -595,8 +595,8 @@
                     {{ __('home.difference.title') }}</h2>
                 <p class="text-primary-foreground/70 text-lg md:text-xl mb-14 max-w-2xl mx-auto leading-relaxed">
                     {{ __('home.difference.description') }}</p>
-                <button
-                    class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-10 btn-premium bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-14 py-8 text-base font-bold gap-2 shadow-[0_8px_30px_-4px_hsl(var(--primary)/0.5)] hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
+                <a href="{{ route('book-now') }}"
+                   class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-10 btn-premium bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-14 py-8 text-base font-bold gap-2 shadow-[0_8px_30px_-4px_hsl(var(--primary)/0.5)] hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300">
                     {{ __('home.common.start_your_journey') }}
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -604,7 +604,7 @@
                         <path d="M5 12h14"></path>
                         <path d="{{ $forwardArrowPath }}"></path>
                     </svg>
-                </button>
+                </a>
             </div>
         </div>
     </section>
@@ -721,8 +721,8 @@
                 </div>
             </div>
             <div class="text-center mt-14">
-                <button
-                    class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border bg-background h-10 rounded-xl px-12 py-7 text-sm font-semibold gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]">
+                <a href="{{ route('about') }}"
+                   class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border bg-background h-10 rounded-xl px-12 py-7 text-sm font-semibold gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]">
                     {{ __('home.common.read_more_about_us') }}
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -730,7 +730,7 @@
                         <path d="M5 12h14"></path>
                         <path d="{{ $forwardArrowPath }}"></path>
                     </svg>
-                </button>
+                </a>
             </div>
         </div>
     </section>

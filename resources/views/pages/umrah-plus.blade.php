@@ -2,6 +2,10 @@
 @section('title', __('umrah-plus.title'))
 @section('meta_description', __('umrah-plus.meta_description'))
 @section('content')
+    @php
+        $sectionContainer = 'container mx-auto max-w-6xl';
+    @endphp
+
     <div class="min-h-screen">
         <section class="relative h-[88vh] min-h-[620px] flex items-center justify-center overflow-hidden"><img
                 src="{{ asset('kidana-home-assets/kaaba-umrah.jpg') }}" alt="{{ __('umrah-plus.hero.image_alt') }}"
@@ -58,18 +62,20 @@
             </div>
         </section>
         <section class="section-padding bg-background">
-            <div class="container mx-auto max-w-4xl text-center animate-fade-in-up"><p
-                    class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('umrah-plus.concept.eyebrow') }}</p>
-                <h2 class="text-3xl md:text-5xl font-bold text-foreground mb-8 leading-tight">{{ __('umrah-plus.concept.title') }}</h2>
-                <div class="space-y-5 text-muted-foreground text-base md:text-lg leading-relaxed">
-                    @foreach (__('umrah-plus.concept.paragraphs') as $paragraph)
-                        <p>{{ $paragraph }}</p>
-                    @endforeach
+            <div class="{{ $sectionContainer }} animate-fade-in-up">
+                <div class="mx-auto max-w-4xl text-center"><p
+                        class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('umrah-plus.concept.eyebrow') }}</p>
+                    <h2 class="text-3xl md:text-5xl font-bold text-foreground mb-8 leading-tight">{{ __('umrah-plus.concept.title') }}</h2>
+                    <div class="space-y-5 text-muted-foreground text-base md:text-lg leading-relaxed">
+                        @foreach (__('umrah-plus.concept.paragraphs') as $paragraph)
+                            <p>{{ $paragraph }}</p>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </section>
         <section class="section-padding bg-muted/40">
-            <div class="container mx-auto max-w-6xl">
+            <div class="{{ $sectionContainer }}">
                 <div class="text-center mb-16"><p
                         class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('umrah-plus.audience.eyebrow') }}</p>
                     <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('umrah-plus.audience.title') }}</h2></div>
@@ -126,7 +132,7 @@
             </div>
         </section>
         <section class="section-padding bg-background">
-            <div class="container mx-auto max-w-6xl">
+            <div class="{{ $sectionContainer }}">
                 <div class="text-center mb-16"><p
                         class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('umrah-plus.experience.eyebrow') }}</p>
                     <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('umrah-plus.experience.title') }}</h2></div>
@@ -238,71 +244,73 @@
             </div>
         </section>
         <section class="section-padding bg-muted/40">
-            <div class="container mx-auto max-w-4xl">
-                <div class="text-center mb-16"><p
-                        class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('umrah-plus.itinerary.eyebrow') }}</p>
-                    <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('umrah-plus.itinerary.title') }}</h2></div>
-                <div class="relative">
-                    <div class="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-[2px] bg-border"></div>
-                    <div class="space-y-10">
-                        <div class="relative md:grid md:grid-cols-2 md:gap-12 items-start animate-fade-in-up"
-                             style="animation-delay: 0s;">
-                            <div class="md:text-right  pl-16 md:pl-0">
-                                <div
-                                    class="bg-card rounded-2xl p-6 border border-border/60 shadow-sm hover:shadow-lg transition-shadow">
-                                    <p class="text-primary text-xs font-bold tracking-[0.25em] uppercase mb-2">{{ __('umrah-plus.itinerary.items.0.day') }}</p>
-                                    <h3 class="text-xl font-bold text-foreground mb-2">{{ __('umrah-plus.itinerary.items.0.title') }}</h3>
-                                    <p class="text-sm text-muted-foreground leading-relaxed">{{ __('umrah-plus.itinerary.items.0.description') }}</p></div>
+            <div class="{{ $sectionContainer }}">
+                <div class="mx-auto max-w-4xl">
+                    <div class="text-center mb-16"><p
+                            class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('umrah-plus.itinerary.eyebrow') }}</p>
+                        <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('umrah-plus.itinerary.title') }}</h2></div>
+                    <div class="relative">
+                        <div class="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-[2px] bg-border"></div>
+                        <div class="space-y-10">
+                            <div class="relative md:grid md:grid-cols-2 md:gap-12 items-start animate-fade-in-up"
+                                 style="animation-delay: 0s;">
+                                <div class="md:text-right  pl-16 md:pl-0">
+                                    <div
+                                        class="bg-card rounded-2xl p-6 border border-border/60 shadow-sm hover:shadow-lg transition-shadow">
+                                        <p class="text-primary text-xs font-bold tracking-[0.25em] uppercase mb-2">{{ __('umrah-plus.itinerary.items.0.day') }}</p>
+                                        <h3 class="text-xl font-bold text-foreground mb-2">{{ __('umrah-plus.itinerary.items.0.title') }}</h3>
+                                        <p class="text-sm text-muted-foreground leading-relaxed">{{ __('umrah-plus.itinerary.items.0.description') }}</p></div>
+                                </div>
+                                <div class="hidden md:block "></div>
+                                <span
+                                    class="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-6 w-5 h-5 rounded-full bg-primary border-4 border-background shadow-md"></span>
                             </div>
-                            <div class="hidden md:block "></div>
-                            <span
-                                class="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-6 w-5 h-5 rounded-full bg-primary border-4 border-background shadow-md"></span>
-                        </div>
-                        <div class="relative md:grid md:grid-cols-2 md:gap-12 items-start animate-fade-in-up"
-                             style="animation-delay: 0.15s;">
-                            <div class="md:text-right md:order-2 md:text-left pl-16 md:pl-0">
-                                <div
-                                    class="bg-card rounded-2xl p-6 border border-border/60 shadow-sm hover:shadow-lg transition-shadow">
-                                    <p class="text-primary text-xs font-bold tracking-[0.25em] uppercase mb-2">{{ __('umrah-plus.itinerary.items.1.day') }}</p>
-                                    <h3 class="text-xl font-bold text-foreground mb-2">{{ __('umrah-plus.itinerary.items.1.title') }}</h3>
-                                    <p class="text-sm text-muted-foreground leading-relaxed">{{ __('umrah-plus.itinerary.items.1.description') }}</p></div>
+                            <div class="relative md:grid md:grid-cols-2 md:gap-12 items-start animate-fade-in-up"
+                                 style="animation-delay: 0.15s;">
+                                <div class="md:text-right md:order-2 md:text-left pl-16 md:pl-0">
+                                    <div
+                                        class="bg-card rounded-2xl p-6 border border-border/60 shadow-sm hover:shadow-lg transition-shadow">
+                                        <p class="text-primary text-xs font-bold tracking-[0.25em] uppercase mb-2">{{ __('umrah-plus.itinerary.items.1.day') }}</p>
+                                        <h3 class="text-xl font-bold text-foreground mb-2">{{ __('umrah-plus.itinerary.items.1.title') }}</h3>
+                                        <p class="text-sm text-muted-foreground leading-relaxed">{{ __('umrah-plus.itinerary.items.1.description') }}</p></div>
+                                </div>
+                                <div class="hidden md:block md:order-1"></div>
+                                <span
+                                    class="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-6 w-5 h-5 rounded-full bg-primary border-4 border-background shadow-md"></span>
                             </div>
-                            <div class="hidden md:block md:order-1"></div>
-                            <span
-                                class="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-6 w-5 h-5 rounded-full bg-primary border-4 border-background shadow-md"></span>
-                        </div>
-                        <div class="relative md:grid md:grid-cols-2 md:gap-12 items-start animate-fade-in-up"
-                             style="animation-delay: 0.3s;">
-                            <div class="md:text-right  pl-16 md:pl-0">
-                                <div
-                                    class="bg-card rounded-2xl p-6 border border-border/60 shadow-sm hover:shadow-lg transition-shadow">
-                                    <p class="text-primary text-xs font-bold tracking-[0.25em] uppercase mb-2">{{ __('umrah-plus.itinerary.items.2.day') }}</p>
-                                    <h3 class="text-xl font-bold text-foreground mb-2">{{ __('umrah-plus.itinerary.items.2.title') }}</h3>
-                                    <p class="text-sm text-muted-foreground leading-relaxed">{{ __('umrah-plus.itinerary.items.2.description') }}</p></div>
+                            <div class="relative md:grid md:grid-cols-2 md:gap-12 items-start animate-fade-in-up"
+                                 style="animation-delay: 0.3s;">
+                                <div class="md:text-right  pl-16 md:pl-0">
+                                    <div
+                                        class="bg-card rounded-2xl p-6 border border-border/60 shadow-sm hover:shadow-lg transition-shadow">
+                                        <p class="text-primary text-xs font-bold tracking-[0.25em] uppercase mb-2">{{ __('umrah-plus.itinerary.items.2.day') }}</p>
+                                        <h3 class="text-xl font-bold text-foreground mb-2">{{ __('umrah-plus.itinerary.items.2.title') }}</h3>
+                                        <p class="text-sm text-muted-foreground leading-relaxed">{{ __('umrah-plus.itinerary.items.2.description') }}</p></div>
+                                </div>
+                                <div class="hidden md:block "></div>
+                                <span
+                                    class="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-6 w-5 h-5 rounded-full bg-primary border-4 border-background shadow-md"></span>
                             </div>
-                            <div class="hidden md:block "></div>
-                            <span
-                                class="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-6 w-5 h-5 rounded-full bg-primary border-4 border-background shadow-md"></span>
-                        </div>
-                        <div class="relative md:grid md:grid-cols-2 md:gap-12 items-start animate-fade-in-up"
-                             style="animation-delay: 0.45s;">
-                            <div class="md:text-right md:order-2 md:text-left pl-16 md:pl-0">
-                                <div
-                                    class="bg-card rounded-2xl p-6 border border-border/60 shadow-sm hover:shadow-lg transition-shadow">
-                                    <p class="text-primary text-xs font-bold tracking-[0.25em] uppercase mb-2">{{ __('umrah-plus.itinerary.items.3.day') }}</p>
-                                    <h3 class="text-xl font-bold text-foreground mb-2">{{ __('umrah-plus.itinerary.items.3.title') }}</h3>
-                                    <p class="text-sm text-muted-foreground leading-relaxed">{{ __('umrah-plus.itinerary.items.3.description') }}</p></div>
+                            <div class="relative md:grid md:grid-cols-2 md:gap-12 items-start animate-fade-in-up"
+                                 style="animation-delay: 0.45s;">
+                                <div class="md:text-right md:order-2 md:text-left pl-16 md:pl-0">
+                                    <div
+                                        class="bg-card rounded-2xl p-6 border border-border/60 shadow-sm hover:shadow-lg transition-shadow">
+                                        <p class="text-primary text-xs font-bold tracking-[0.25em] uppercase mb-2">{{ __('umrah-plus.itinerary.items.3.day') }}</p>
+                                        <h3 class="text-xl font-bold text-foreground mb-2">{{ __('umrah-plus.itinerary.items.3.title') }}</h3>
+                                        <p class="text-sm text-muted-foreground leading-relaxed">{{ __('umrah-plus.itinerary.items.3.description') }}</p></div>
+                                </div>
+                                <div class="hidden md:block md:order-1"></div>
+                                <span
+                                    class="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-6 w-5 h-5 rounded-full bg-primary border-4 border-background shadow-md"></span>
                             </div>
-                            <div class="hidden md:block md:order-1"></div>
-                            <span
-                                class="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-6 w-5 h-5 rounded-full bg-primary border-4 border-background shadow-md"></span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
         <section class="section-padding bg-background">
-            <div class="container mx-auto max-w-6xl">
+            <div class="{{ $sectionContainer }}">
                 <div class="text-center mb-16"><p
                         class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('umrah-plus.gallery.eyebrow') }}</p>
                     <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('umrah-plus.gallery.title') }}</h2></div>
@@ -357,33 +365,35 @@
                  style="background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);">
             <div
                 class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_20%,white,transparent_50%)]"></div>
-            <div class="relative z-10 container mx-auto max-w-3xl text-center text-primary-foreground px-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     class="lucide lucide-sparkles w-12 h-12 mx-auto mb-6 opacity-90">
-                    <path
-                        d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path>
-                    <path d="M20 3v4"></path>
-                    <path d="M22 5h-4"></path>
-                    <path d="M4 17v2"></path>
-                    <path d="M5 18H3"></path>
-                </svg>
-                <h2 class="text-3xl md:text-5xl font-bold mb-6 leading-tight">{{ __('umrah-plus.custom.title') }}</h2>
-                <p class="text-primary-foreground/90 text-base md:text-lg mb-10 leading-relaxed">{{ __('umrah-plus.custom.description') }}</p><a href="https://wa.me/201033455433"
-                                                                                    target="_blank"
-                                                                                    rel="noopener noreferrer"
-                                                                                    class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 btn-premium bg-primary-foreground text-secondary hover:bg-primary-foreground/90 rounded-xl px-12 py-7 text-base font-bold gap-2">
-                    {{ __('umrah-plus.custom.cta') }}
+            <div class="relative z-10 {{ $sectionContainer }} text-primary-foreground px-4">
+                <div class="mx-auto max-w-3xl text-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                         class="lucide lucide-arrow-right w-5 h-5">
-                        <path d="M5 12h14"></path>
-                        <path d="m12 5 7 7-7 7"></path>
+                         class="lucide lucide-sparkles w-12 h-12 mx-auto mb-6 opacity-90">
+                        <path
+                            d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path>
+                        <path d="M20 3v4"></path>
+                        <path d="M22 5h-4"></path>
+                        <path d="M4 17v2"></path>
+                        <path d="M5 18H3"></path>
                     </svg>
-                </a></div>
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 leading-tight">{{ __('umrah-plus.custom.title') }}</h2>
+                    <p class="text-primary-foreground/90 text-base md:text-lg mb-10 leading-relaxed">{{ __('umrah-plus.custom.description') }}</p><a href="https://wa.me/201033455433"
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 btn-premium bg-primary-foreground text-secondary hover:bg-primary-foreground/90 rounded-xl px-12 py-7 text-base font-bold gap-2">
+                        {{ __('umrah-plus.custom.cta') }}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             class="lucide lucide-arrow-right w-5 h-5">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </a></div>
+            </div>
         </section>
         <section class="section-padding bg-background">
-            <div class="container mx-auto max-w-6xl">
+            <div class="{{ $sectionContainer }}">
                 <div class="text-center mb-16"><p
                         class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('umrah-plus.trust.eyebrow') }}</p>
                     <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('umrah-plus.trust.title') }}</h2></div>
@@ -444,11 +454,12 @@
             </div>
         </section>
         <section class="section-padding bg-muted/40">
-            <div class="container mx-auto max-w-3xl">
-                <div class="text-center mb-12"><p
-                        class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('umrah-plus.faq.eyebrow') }}</p>
-                    <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('umrah-plus.faq.title') }}</h2></div>
-                <div class="space-y-4">
+            <div class="{{ $sectionContainer }}">
+                <div class="mx-auto max-w-3xl">
+                    <div class="text-center mb-12"><p
+                            class="text-primary font-semibold tracking-[0.3em] uppercase text-xs mb-4">{{ __('umrah-plus.faq.eyebrow') }}</p>
+                        <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('umrah-plus.faq.title') }}</h2></div>
+                    <div class="space-y-4">
                     <details class="group bg-card rounded-2xl border border-border/60 px-6 shadow-sm">
                         <summary
                             class="flex cursor-pointer list-none items-center justify-between py-5 text-left text-base font-semibold text-foreground md:text-lg">
@@ -524,6 +535,7 @@
                             {{ __('umrah-plus.faq.items.4.answer') }}
                         </p>
                     </details>
+                    </div>
                 </div>
             </div>
         </section>
@@ -532,29 +544,31 @@
                 class="absolute inset-0 w-full h-full object-cover">
             <div
                 class="absolute inset-0 bg-gradient-to-b from-[hsl(var(--hero-overlay))]/90 to-[hsl(var(--secondary))]/90"></div>
-            <div class="relative z-10 container mx-auto max-w-3xl text-center text-primary-foreground px-4"><h2
-                    class="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">{{ __('umrah-plus.final_cta.title') }}</h2>
-                <p class="text-primary-foreground/85 text-base md:text-lg mb-10">{{ __('umrah-plus.final_cta.description') }}</p>
-                <div class="flex flex-col sm:flex-row gap-5 justify-center"><a href="https://wa.me/201033455433"
-                                                                               target="_blank"
-                                                                               rel="noopener noreferrer"
-                                                                               class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 btn-premium bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-12 py-7 text-base font-bold gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                             stroke-linejoin="round" class="lucide lucide-message-circle w-5 h-5">
-                            <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
-                        </svg>
-                        {{ __('umrah-plus.final_cta.whatsapp') }}
-                    </a><a href="tel:+201033455433"
-                           class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border h-10 bg-primary-foreground border-primary-foreground/20 text-secondary hover:bg-primary hover:text-primary-foreground hover:border-primary rounded-xl px-12 py-7 text-base font-bold gap-2 transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                             stroke-linejoin="round" class="lucide lucide-phone w-5 h-5">
-                            <path
-                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                        </svg>
-                        {{ __('umrah-plus.final_cta.call') }}
-                    </a></div>
+            <div class="relative z-10 {{ $sectionContainer }} text-primary-foreground px-4">
+                <div class="mx-auto max-w-3xl text-center"><h2
+                        class="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">{{ __('umrah-plus.final_cta.title') }}</h2>
+                    <p class="text-primary-foreground/85 text-base md:text-lg mb-10">{{ __('umrah-plus.final_cta.description') }}</p>
+                    <div class="flex flex-col sm:flex-row gap-5 justify-center"><a href="https://wa.me/201033455433"
+                                                                                   target="_blank"
+                                                                                   rel="noopener noreferrer"
+                                                                                   class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 btn-premium bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-12 py-7 text-base font-bold gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round" class="lucide lucide-message-circle w-5 h-5">
+                                <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+                            </svg>
+                            {{ __('umrah-plus.final_cta.whatsapp') }}
+                        </a><a href="tel:+201033455433"
+                               class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border h-10 bg-primary-foreground border-primary-foreground/20 text-secondary hover:bg-primary hover:text-primary-foreground hover:border-primary rounded-xl px-12 py-7 text-base font-bold gap-2 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round" class="lucide lucide-phone w-5 h-5">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            {{ __('umrah-plus.final_cta.call') }}
+                        </a></div>
+                </div>
             </div>
         </section>
         <a href="https://wa.me/201033455433" target="_blank" rel="noopener noreferrer" aria-label="{{ __('umrah-plus.floating_whatsapp') }}"

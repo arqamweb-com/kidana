@@ -92,7 +92,7 @@
 
 @theme inline {
     --font-sans:
-        "Lama Sans", ui-sans-serif, system-ui, sans-serif,
+        "Poppins", "Cairo", ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
 
@@ -152,7 +152,7 @@ h3,
 h4,
 h5,
 h6 {
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
 }
 
 .section-padding {
@@ -198,17 +198,13 @@ h6 {
 
 .container {
     width: 100%;
+    margin-inline: auto;
+    padding-inline: 2rem;
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1400px) {
     .container {
         max-width: 1400px;
-    }
-}
-
-@media (min-width: 1536px) {
-    .container {
-        max-width: 1440px;
     }
 }
 

@@ -26,6 +26,11 @@
     <meta name="robots" content="@yield('meta_robots', 'index, follow')">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap">
+
     <link rel="canonical" href="@yield('canonical', url()->current())">
     @if ($routeName)
         @foreach (config('locales.supported', []) as $alternateLocale => $localeConfig)

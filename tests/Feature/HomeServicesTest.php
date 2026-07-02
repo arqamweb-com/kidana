@@ -3,8 +3,10 @@
 use App\Models\Destination;
 use App\Models\Faq;
 use App\Models\Office;
+use App\Models\Package;
 use App\Models\Partner;
 use App\Models\Service;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 
@@ -97,6 +99,38 @@ test('home page shows an empty services state when no active services exist', fu
 
     $response->assertSuccessful();
     $response->assertSee('No services available yet');
+});
+
+test('home page displays six featured packages from the dashboard', function () {
+    $packages = Package::factory()
+        ->count(7)
+        ->sequence(fn (Sequence $sequence): array => [
+            'name' => ['en' => "Featured Package {$sequence->index}"],
+            'slug' => "featured-package-{$sequence->index}",
+            'sort_order' => $sequence->index,
+            'is_active' => true,
+        ])
+        ->create();
+
+    $hiddenPackage = Package::factory()->create([
+        'name' => ['en' => 'Inactive Featured Package'],
+        'slug' => 'inactive-featured-package',
+        'sort_order' => 0,
+        'is_active' => false,
+    ]);
+
+    $response = $this->get(route('home'));
+
+    $response->assertSuccessful();
+    expect(substr_count($response->getContent(), 'data-package-card'))->toBe(6);
+
+    $packages->take(6)->each(function (Package $package) use ($response): void {
+        $response->assertSee($package->name);
+        $response->assertSee(route('packages.show', ['package' => $package->slug]), false);
+    });
+
+    $response->assertDontSee($packages->last()->name);
+    $response->assertDontSee($hiddenPackage->name);
 });
 
 test('home page displays active offices in the presence section', function () {
