@@ -39,8 +39,11 @@
                         data-destination="{{ $package->destination?->slug }}"
                         class="group overflow-hidden rounded-3xl border border-border/50 bg-card transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_24px_80px_-30px_hsl(var(--foreground)/0.18)]">
                         <div class="relative h-64 overflow-hidden bg-muted">
-                            <img src="{{ $packageImageUrl }}" alt="{{ $package->name }}"
-                                 class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
+                            <a href="{{ route('packages.show', ['package' => $package->slug]) }}"
+                               class="block h-full w-full">
+                                <img src="{{ $packageImageUrl }}" alt="{{ $package->name }}"
+                                     class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105">
+                            </a>
 
                             <div
                                 class="absolute end-4 top-4 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]">
@@ -80,7 +83,10 @@
                                 @endif
                             </div>
 
-                            <h3 class="mb-3 text-xl font-bold text-foreground">{{ $package->name }}</h3>
+                            <h3 class="mb-3 text-xl font-bold text-foreground">
+                                <a href="{{ route('packages.show', ['package' => $package->slug]) }}"
+                                   class="transition-colors hover:text-primary">{{ $package->name }}</a>
+                            </h3>
 
                             <div class="flex items-center gap-4 text-muted-foreground text-sm mb-6">
                                 @if ($package->destination?->name)

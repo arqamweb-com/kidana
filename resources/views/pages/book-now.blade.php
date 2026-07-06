@@ -165,8 +165,11 @@
                                      data-days="{{ (int) $package->days }}"
                                      style="box-shadow: 0 4px 24px -6px hsl(var(--foreground) / 0.1), 0 12px 48px -12px hsl(var(--foreground) / 0.08);">
                                     <div class="relative h-56 overflow-hidden">
-                                        <img src="{{ $packageImageUrl }}" alt="{{ $package->name }}" loading="lazy"
-                                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                        <a href="{{ route('packages.show', ['package' => $package->slug]) }}"
+                                           class="block w-full h-full">
+                                            <img src="{{ $packageImageUrl }}" alt="{{ $package->name }}" loading="lazy"
+                                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                        </a>
                                         @if ($packageTags->isNotEmpty())
                                             <div class="absolute top-4 left-4 flex flex-wrap gap-1.5">
                                                 @foreach ($packageTags as $tag)
@@ -185,7 +188,10 @@
                                         @endif
                                     </div>
                                     <div class="flex flex-col flex-1 p-6">
-                                        <h3 class="text-lg font-bold text-foreground mb-3">{{ $package->name }}</h3>
+                                        <h3 class="text-lg font-bold text-foreground mb-3">
+                                            <a href="{{ route('packages.show', ['package' => $package->slug]) }}"
+                                               class="transition-colors hover:text-primary">{{ $package->name }}</a>
+                                        </h3>
                                         <div class="flex items-center gap-4 text-muted-foreground text-sm mb-4">
                                             @if (filled($package->location_label) || $package->destination?->name)
                                                 <span class="flex items-center gap-1.5">
