@@ -1,7 +1,8 @@
 <?php
 
 return [
-    'title' => 'Accueil',
+    'title' => 'Kidana Travel – Hajj, Omra et voyages de luxe',
+    'meta_description' => 'Des expériences de voyage haut de gamme pour le Hajj, la Omra et les destinations internationales. Service 5 étoiles, transferts VIP et forfaits exclusifs.',
     'common' => [
         'view_all_services' => 'Voir tous les services',
         'view_all_packages' => 'Voir tous les forfaits',

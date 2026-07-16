@@ -1,7 +1,8 @@
 <?php
 
 return [
-    'title' => 'Home',
+    'title' => 'Kidana Travel – Luxury Hajj, Umrah & Travel',
+    'meta_description' => 'Premium luxury travel experiences for Hajj, Umrah, and international destinations. 5-star service, VIP transfers, and exclusive packages.',
     'common' => [
         'view_all_services' => 'View All Services',
         'view_all_packages' => 'View All Packages',

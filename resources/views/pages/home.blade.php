@@ -1,6 +1,6 @@
 @extends('layout.master')
 @section('title', __('home.title'))
-@section('meta_description', 'Kidana Travel offers premium Hajj, Umrah, and international travel packages with curated destinations and dedicated support.')
+@section('meta_description', __('home.meta_description'))
 @section('content')
     @php
         $resolveImageUrl = static function (?string $imagePath, string $fallback): string {

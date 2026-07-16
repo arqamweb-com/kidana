@@ -1,7 +1,8 @@
 <?php
 
 return [
-    'title' => 'Beranda',
+    'title' => 'Kidana Travel – Haji, Umrah & Perjalanan Mewah',
+    'meta_description' => 'Pengalaman perjalanan mewah premium untuk Haji, Umrah, dan destinasi internasional. Layanan bintang 5, transfer VIP, dan paket eksklusif.',
     'common' => [
         'view_all_services' => 'Lihat Semua Layanan',
         'view_all_packages' => 'Lihat Semua Paket',
