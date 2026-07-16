@@ -71,6 +71,8 @@
 @yield('content')
 
 @include('layout.footer')
+
+@include('components.whatsapp-float')
 </body>
 
 </html>
