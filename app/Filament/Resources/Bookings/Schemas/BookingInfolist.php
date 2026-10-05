@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Bookings\Schemas;
 
+use App\Models\Booking;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -15,7 +16,12 @@ class BookingInfolist
                 Section::make('Booking')
                     ->schema([
                         TextEntry::make('id')->label('Booking ID'),
-                        TextEntry::make('package.name')->label('Package'),
+                        TextEntry::make('package.name')
+                            ->label('Package')
+                            ->hidden(fn (Booking $record): bool => $record->isHotelBooking()),
+                        TextEntry::make('hotel.name')
+                            ->label('Hotel')
+                            ->visible(fn (Booking $record): bool => $record->isHotelBooking()),
                         TextEntry::make('status')
                             ->badge()
                             ->formatStateUsing(fn ($state): string => $state?->value ?? (string) $state)
@@ -27,6 +33,18 @@ class BookingInfolist
                         TextEntry::make('created_at')->dateTime(),
                     ])
                     ->columns(2),
+                Section::make('Hotel Stay')
+                    ->schema([
+                        TextEntry::make('hotelRoom.name')->label('Room type'),
+                        TextEntry::make('rooms'),
+                        TextEntry::make('check_in')->date(),
+                        TextEntry::make('check_out')->date(),
+                        TextEntry::make('nights'),
+                        TextEntry::make('adults'),
+                        TextEntry::make('children'),
+                    ])
+                    ->columns(2)
+                    ->visible(fn (Booking $record): bool => $record->isHotelBooking()),
                 Section::make('Customer')
                     ->schema([
                         TextEntry::make('customer_name'),

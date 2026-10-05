@@ -4,6 +4,7 @@ return [
     'home' => 'Beranda',
     'services' => 'Layanan',
     'all_services' => 'Semua layanan',
+    'hotels' => 'Hotel',
     'packages' => 'Paket',
     'umrah_plus' => 'Umrah Plus',
     'new' => 'Baru',

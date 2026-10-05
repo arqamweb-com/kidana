@@ -7,6 +7,9 @@ use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\DestinationIndexController;
 use App\Http\Controllers\FawryWebhookController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HotelBookingController;
+use App\Http\Controllers\HotelController;
+use App\Http\Controllers\HotelShowController;
 use App\Http\Controllers\PackageBookingController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageSearchController;
@@ -55,6 +58,11 @@ Route::prefix('{locale}')
         Route::post('/packages/{package:slug}/request', [PackageBookingController::class, 'storeRequest'])->name('packages.request.store');
         Route::get('/packages/{package:slug}/checkout', [PackageBookingController::class, 'checkoutForm'])->name('packages.checkout');
         Route::post('/packages/{package:slug}/checkout', [PackageBookingController::class, 'startCheckout'])->name('packages.checkout.store');
+        Route::get('/hotels', HotelController::class)->name('hotels');
+        Route::get('/hotels/{hotel:slug}', HotelShowController::class)->name('hotels.show');
+        Route::get('/hotels/{hotel:slug}/book', [HotelBookingController::class, 'create'])->name('hotels.book');
+        Route::post('/hotels/{hotel:slug}/book', [HotelBookingController::class, 'store'])->name('hotels.book.store')->middleware('throttle:10,1');
+
         Route::get('/bookings/{booking}/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
         Route::get('/bookings/{booking}/result', [PackageBookingController::class, 'result'])->name('bookings.result');
 

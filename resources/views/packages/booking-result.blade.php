@@ -48,9 +48,22 @@
                         <dd class="text-sm font-bold text-foreground">#{{ $booking->id }}</dd>
                     </div>
                     <div class="flex justify-between gap-4 px-5 py-4">
-                        <dt class="text-sm text-muted-foreground">{{ __('packages.booking.package') }}</dt>
-                        <dd class="text-sm font-bold text-foreground">{{ $booking->package->name }}</dd>
+                        <dt class="text-sm text-muted-foreground">{{ $booking->isHotelBooking() ? __('hotels.booking.hotel') : __('packages.booking.package') }}</dt>
+                        <dd class="text-sm font-bold text-foreground">{{ $booking->bookedItemName() }}</dd>
                     </div>
+                    @if ($booking->isHotelBooking())
+                        <div class="flex justify-between gap-4 px-5 py-4">
+                            <dt class="text-sm text-muted-foreground">{{ __('hotels.booking.stay') }}</dt>
+                            <dd class="text-sm font-bold text-foreground">
+                                {{ $booking->check_in?->translatedFormat('j M Y') }} &rarr; {{ $booking->check_out?->translatedFormat('j M Y') }}
+                                ({{ trans_choice('hotels.booking.nights_count', $booking->nights, ['count' => $booking->nights]) }})
+                            </dd>
+                        </div>
+                        <div class="flex justify-between gap-4 px-5 py-4">
+                            <dt class="text-sm text-muted-foreground">{{ __('hotels.booking.rooms') }}</dt>
+                            <dd class="text-sm font-bold text-foreground">{{ $booking->rooms }}</dd>
+                        </div>
+                    @endif
                     @if ($payment)
                         <div class="flex justify-between gap-4 px-5 py-4">
                             <dt class="text-sm text-muted-foreground">{{ __('packages.booking.fawry_reference') }}</dt>
@@ -63,10 +76,12 @@
                     @endif
                 </dl>
 
-                <a href="{{ route('packages.show', ['package' => $booking->package->slug]) }}"
-                   class="mt-8 inline-flex items-center justify-center rounded-xl border border-border bg-background px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary">
-                    {{ __('packages.booking.back_to_package') }}
-                </a>
+                @if ($booking->bookedItemUrl())
+                    <a href="{{ $booking->bookedItemUrl() }}"
+                       class="mt-8 inline-flex items-center justify-center rounded-xl border border-border bg-background px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary">
+                        {{ $booking->isHotelBooking() ? __('hotels.booking.back_to_hotel') : __('packages.booking.back_to_package') }}
+                    </a>
+                @endif
             </div>
         </div>
     </section>

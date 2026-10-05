@@ -4,6 +4,7 @@ return [
     'home' => 'Home',
     'services' => 'Services',
     'all_services' => 'All Services',
+    'hotels' => 'Hotels',
     'packages' => 'Packages',
     'umrah_plus' => 'Umrah Plus',
     'new' => 'New',

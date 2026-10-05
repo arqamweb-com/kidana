@@ -48,6 +48,11 @@ class Testimonial extends Model
         return $this->belongsToMany(Package::class);
     }
 
+    public function hotels(): BelongsToMany
+    {
+        return $this->belongsToMany(Hotel::class);
+    }
+
     public function services(): BelongsToMany
     {
         return $this->belongsToMany(Service::class);

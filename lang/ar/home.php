@@ -6,6 +6,7 @@ return [
     'common' => [
         'view_all_services' => 'عرض كل الخدمات',
         'view_all_packages' => 'عرض كل الباقات',
+        'view_all_hotels' => 'عرض كل الفنادق',
         'view_all_destinations' => 'عرض كل الوجهات',
         'read_more_about_us' => 'اقرأ المزيد عنا',
         'view_all_testimonials' => 'عرض كل آراء العملاء',
@@ -72,6 +73,11 @@ return [
     'packages' => [
         'eyebrow' => 'مختارة لك',
         'title' => 'باقات مميزة',
+    ],
+    'hotels' => [
+        'eyebrow' => 'إقامتك معنا',
+        'title' => 'فنادق مختارة',
+        'description' => 'فنادق مريحة مختارة بعناية في أبرز وجهاتنا. اختر غرفتك واحجز إقامتك عبر الإنترنت.',
     ],
     'package_card' => [
         'popular' => 'رائج',

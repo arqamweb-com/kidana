@@ -17,7 +17,7 @@ class PaymentController extends Controller
     {
         abort_unless($booking->locale === $locale, 404);
 
-        $booking->loadMissing('package', 'payment');
+        $booking->loadMissing('package', 'hotel', 'hotelRoom', 'payment');
         abort_unless($booking->payment !== null, 404);
 
         $chargeRequest = $this->fawry->buildChargeRequest([
@@ -32,8 +32,8 @@ class PaymentController extends Controller
             ],
             'items' => [
                 [
-                    'id' => (string) $booking->package_id,
-                    'description' => (string) $booking->package->name,
+                    'id' => (string) ($booking->package_id ?? $booking->hotel_room_id),
+                    'description' => $booking->bookedItemName(),
                     'price' => $booking->payment->amount,
                     'quantity' => 1,
                 ],

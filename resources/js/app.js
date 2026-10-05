@@ -697,4 +697,37 @@ document.addEventListener('DOMContentLoaded', () => {
             element.classList.remove('opacity-0');
         });
     }
+
+    document.querySelectorAll('[data-hotel-booking]').forEach((form) => {
+        const checkIn = form.querySelector('[data-hotel-check-in]');
+        const checkOut = form.querySelector('[data-hotel-check-out]');
+        const rooms = form.querySelector('[data-hotel-rooms]');
+        const estimate = form.querySelector('[data-hotel-estimate]');
+        const dayInMs = 24 * 60 * 60 * 1000;
+
+        const updateEstimate = () => {
+            const selectedRoom = form.querySelector('[data-hotel-room]:checked');
+            const nights = checkIn?.value && checkOut?.value
+                ? Math.round((new Date(checkOut.value) - new Date(checkIn.value)) / dayInMs)
+                : 0;
+            const roomCount = Number(rooms?.value) || 0;
+
+            if (checkIn?.value && checkOut) {
+                const nextDay = new Date(new Date(checkIn.value).getTime() + dayInMs);
+                checkOut.min = nextDay.toISOString().slice(0, 10);
+            }
+
+            if (! estimate) {
+                return;
+            }
+
+            estimate.textContent = selectedRoom && nights > 0 && roomCount > 0
+                ? (Number(selectedRoom.dataset.price) * nights * roomCount).toLocaleString()
+                : '—';
+        };
+
+        form.addEventListener('input', updateEstimate);
+        form.addEventListener('change', updateEstimate);
+        updateEstimate();
+    });
 });

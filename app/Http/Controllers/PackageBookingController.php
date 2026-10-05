@@ -70,7 +70,7 @@ class PackageBookingController extends Controller
         abort_unless($booking->locale === $locale, 404);
 
         return view('packages.booking-result', [
-            'booking' => $booking->loadMissing('package'),
+            'booking' => $booking->loadMissing('package', 'hotel', 'hotelRoom'),
             'payment' => $booking->payment,
             'status' => 'payment_result',
         ]);

@@ -6,6 +6,7 @@ return [
     'common' => [
         'view_all_services' => 'Voir tous les services',
         'view_all_packages' => 'Voir tous les forfaits',
+        'view_all_hotels' => 'Voir tous les hôtels',
         'view_all_destinations' => 'Voir toutes les destinations',
         'read_more_about_us' => 'En savoir plus sur nous',
         'view_all_testimonials' => 'Voir tous les témoignages',
@@ -48,6 +49,11 @@ return [
         'empty_description' => 'Ajoutez des services actifs depuis le tableau de bord et ils apparaîtront ici automatiquement.',
     ],
     'packages' => ['eyebrow' => 'Sélectionné pour vous', 'title' => 'Forfaits en vedette'],
+    'hotels' => [
+        'eyebrow' => 'Votre séjour',
+        'title' => 'Hôtels à la une',
+        'description' => 'Des hôtels confortables choisis avec soin dans nos meilleures destinations. Choisissez votre chambre et réservez en ligne.',
+    ],
     'package_card' => [
         'popular' => 'Populaire',
         'days' => ':count jours',

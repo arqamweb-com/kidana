@@ -4,6 +4,7 @@ return [
     'home' => 'Accueil',
     'services' => 'Services',
     'all_services' => 'Tous les services',
+    'hotels' => 'Hôtels',
     'packages' => 'Forfaits',
     'umrah_plus' => 'Omra Plus',
     'new' => 'Nouveau',

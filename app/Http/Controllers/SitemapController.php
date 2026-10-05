@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Destination;
+use App\Models\Hotel;
 use App\Models\Package;
 use App\Models\Service;
 use Illuminate\Http\Response;
@@ -20,6 +21,7 @@ class SitemapController extends Controller
         foreach ($locales as $locale) {
             $urls->push(route('home', ['locale' => $locale]));
             $urls->push(route('packages', ['locale' => $locale]));
+            $urls->push(route('hotels', ['locale' => $locale]));
             $urls->push(route('services.index', ['locale' => $locale]));
             $urls->push(route('destinations.index', ['locale' => $locale]));
             $urls->push(route('about', ['locale' => $locale]));
@@ -33,6 +35,15 @@ class SitemapController extends Controller
             ->each(function (Package $package) use ($locales, $urls): void {
                 foreach ($locales as $locale) {
                     $urls->push(route('packages.show', ['locale' => $locale, 'package' => $package->slug]));
+                }
+            });
+
+        Hotel::query()
+            ->active()
+            ->get(['slug'])
+            ->each(function (Hotel $hotel) use ($locales, $urls): void {
+                foreach ($locales as $locale) {
+                    $urls->push(route('hotels.show', ['locale' => $locale, 'hotel' => $hotel->slug]));
                 }
             });
 

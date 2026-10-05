@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasAutoSlug;
+use Database\Factories\DestinationFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,9 +12,11 @@ use Spatie\Translatable\HasTranslations;
 
 class Destination extends Model
 {
-    /** @use HasFactory<\Database\Factories\DestinationFactory> */
-    use HasFactory;
     use HasAutoSlug;
+
+    /** @use HasFactory<DestinationFactory> */
+    use HasFactory;
+
     use HasTranslations;
 
     protected $fillable = [
@@ -45,6 +48,11 @@ class Destination extends Model
     public function packages(): HasMany
     {
         return $this->hasMany(Package::class);
+    }
+
+    public function hotels(): HasMany
+    {
+        return $this->hasMany(Hotel::class);
     }
 
     public function scopeActive(Builder $query): Builder

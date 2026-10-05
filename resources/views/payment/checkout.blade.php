@@ -13,8 +13,10 @@
             <x-breadcrumbs
                 class="mb-8"
                 :items="[
-                    ['label' => __('nav.packages'), 'url' => route('packages')],
-                    ['label' => $booking->package->name, 'url' => route('packages.show', ['package' => $booking->package->slug])],
+                    $booking->isHotelBooking()
+                        ? ['label' => __('nav.hotels'), 'url' => route('hotels')]
+                        : ['label' => __('nav.packages'), 'url' => route('packages')],
+                    ['label' => $booking->bookedItemName(), 'url' => $booking->bookedItemUrl()],
                     ['label' => __('packages.booking.checkout')],
                 ]"
             />
@@ -33,8 +35,8 @@
                         <dd class="text-sm font-bold text-foreground">#{{ $booking->id }}</dd>
                     </div>
                     <div class="flex justify-between gap-4 px-5 py-4">
-                        <dt class="text-sm text-muted-foreground">{{ __('packages.booking.package') }}</dt>
-                        <dd class="text-sm font-bold text-foreground">{{ $booking->package->name }}</dd>
+                        <dt class="text-sm text-muted-foreground">{{ $booking->isHotelBooking() ? __('hotels.booking.hotel') : __('packages.booking.package') }}</dt>
+                        <dd class="text-sm font-bold text-foreground">{{ $booking->bookedItemName() }}</dd>
                     </div>
                     <div class="flex justify-between gap-4 px-5 py-4">
                         <dt class="text-sm text-muted-foreground">{{ __('packages.booking.amount') }}</dt>

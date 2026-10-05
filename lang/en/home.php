@@ -6,6 +6,7 @@ return [
     'common' => [
         'view_all_services' => 'View All Services',
         'view_all_packages' => 'View All Packages',
+        'view_all_hotels' => 'View All Hotels',
         'view_all_destinations' => 'View All Destinations',
         'read_more_about_us' => 'Read More About Us',
         'view_all_testimonials' => 'View All Testimonials',
@@ -72,6 +73,11 @@ return [
     'packages' => [
         'eyebrow' => 'Curated For You',
         'title' => 'Featured Packages',
+    ],
+    'hotels' => [
+        'eyebrow' => 'Your Stay',
+        'title' => 'Featured Hotels',
+        'description' => 'Comfortable, hand-picked hotels in our top destinations. Pick your room and book your stay online.',
     ],
     'package_card' => [
         'popular' => 'Popular',

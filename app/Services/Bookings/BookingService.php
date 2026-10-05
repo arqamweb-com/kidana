@@ -7,9 +7,11 @@ use App\Enum\PackageOrderAction;
 use App\Enum\PaymentStatus;
 use App\Mail\BookingPaymentSucceeded;
 use App\Models\Booking;
+use App\Models\HotelRoom;
 use App\Models\Package;
 use App\Models\Payment;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -40,16 +42,59 @@ class BookingService
                 'status' => BookingStatus::AwaitingPayment,
             ]);
 
-            $booking->payment()->create([
-                'provider' => 'fawry',
-                'merchant_ref_number' => $this->merchantReference($booking),
-                'payment_method' => 'FawryPayCheckoutButton',
-                'status' => PaymentStatus::Pending,
-                'amount' => $booking->total_amount,
-                'currency' => $booking->currency,
-            ]);
+            $this->createFawryPayment($booking);
 
             return $booking->loadMissing('package', 'payment');
+        });
+    }
+
+    /**
+     * @param  array{room: HotelRoom, check_in: Carbon, check_out: Carbon, nights: int, rooms: int, adults: int, children: int, total: int}  $stay
+     * @param  array<string, mixed>  $customer
+     */
+    public function createHotelBooking(array $stay, array $customer, string $locale): Booking
+    {
+        $room = $stay['room'];
+        $orderAction = $room->hotel->order_action;
+
+        return DB::transaction(function () use ($room, $stay, $customer, $locale, $orderAction): Booking {
+            HotelRoom::query()->whereKey($room->id)->lockForUpdate()->first();
+
+            if ($room->availableRoomsBetween($stay['check_in'], $stay['check_out']) < $stay['rooms']) {
+                throw ValidationException::withMessages([
+                    'rooms' => __('hotels.booking.errors.not_available'),
+                ]);
+            }
+
+            $booking = Booking::create([
+                'hotel_id' => $room->hotel_id,
+                'hotel_room_id' => $room->id,
+                'customer_name' => $customer['customer_name'],
+                'customer_email' => $customer['customer_email'],
+                'customer_mobile' => $customer['customer_mobile'],
+                'guests' => $stay['adults'] + $stay['children'],
+                'travel_date' => $stay['check_in'],
+                'check_in' => $stay['check_in'],
+                'check_out' => $stay['check_out'],
+                'nights' => $stay['nights'],
+                'rooms' => $stay['rooms'],
+                'adults' => $stay['adults'],
+                'children' => $stay['children'],
+                'message' => $customer['message'] ?? null,
+                'locale' => $locale,
+                'type' => $orderAction,
+                'status' => $orderAction === PackageOrderAction::FawryPayment
+                    ? BookingStatus::AwaitingPayment
+                    : BookingStatus::Pending,
+                'total_amount' => $stay['total'],
+                'currency' => 'EGP',
+            ]);
+
+            if ($orderAction === PackageOrderAction::FawryPayment) {
+                $this->createFawryPayment($booking);
+            }
+
+            return $booking->loadMissing('hotel', 'hotelRoom', 'payment');
         });
     }
 
@@ -66,7 +111,7 @@ class BookingService
 
         $payment = Payment::query()
             ->where('merchant_ref_number', $merchantReference)
-            ->with('booking.package')
+            ->with('booking.package', 'booking.hotel')
             ->first();
 
         if (! $payment) {
@@ -110,7 +155,7 @@ class BookingService
             ]);
         });
 
-        $payment->refresh()->loadMissing('booking.package');
+        $payment->refresh()->loadMissing('booking.package', 'booking.hotel');
 
         if ($payment->status === PaymentStatus::Paid) {
             $this->sendPaymentSuccessEmail($payment->booking);
@@ -175,6 +220,18 @@ class BookingService
             'total_amount' => $package->price,
             'currency' => 'EGP',
         ];
+    }
+
+    protected function createFawryPayment(Booking $booking): Payment
+    {
+        return $booking->payment()->create([
+            'provider' => 'fawry',
+            'merchant_ref_number' => $this->merchantReference($booking),
+            'payment_method' => 'FawryPayCheckoutButton',
+            'status' => PaymentStatus::Pending,
+            'amount' => $booking->total_amount,
+            'currency' => $booking->currency,
+        ]);
     }
 
     protected function merchantReference(Booking $booking): string

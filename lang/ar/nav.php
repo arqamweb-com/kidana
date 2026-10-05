@@ -4,6 +4,7 @@ return [
     'home' => 'الرئيسية',
     'services' => 'الخدمات',
     'all_services' => 'كل الخدمات',
+    'hotels' => 'الفنادق',
     'packages' => 'الباقات',
     'umrah_plus' => 'عمرة بلس',
     'new' => 'جديد',

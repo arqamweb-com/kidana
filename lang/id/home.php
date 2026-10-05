@@ -6,6 +6,7 @@ return [
     'common' => [
         'view_all_services' => 'Lihat Semua Layanan',
         'view_all_packages' => 'Lihat Semua Paket',
+        'view_all_hotels' => 'Lihat Semua Hotel',
         'view_all_destinations' => 'Lihat Semua Destinasi',
         'read_more_about_us' => 'Baca Lebih Lanjut Tentang Kami',
         'view_all_testimonials' => 'Lihat Semua Testimoni',
@@ -48,6 +49,11 @@ return [
         'empty_description' => 'Tambahkan layanan aktif dari dashboard dan layanan akan muncul otomatis di sini.',
     ],
     'packages' => ['eyebrow' => 'Dipilih Untuk Anda', 'title' => 'Paket Unggulan'],
+    'hotels' => [
+        'eyebrow' => 'Tempat Menginap',
+        'title' => 'Hotel Pilihan',
+        'description' => 'Hotel nyaman pilihan di destinasi unggulan kami. Pilih kamar dan pesan masa inap Anda secara online.',
+    ],
     'package_card' => [
         'popular' => 'Populer',
         'days' => ':count Hari',

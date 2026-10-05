@@ -20,7 +20,7 @@ class BookingPaymentSucceeded extends Mailable implements ShouldQueue
      */
     public function __construct(public Booking $booking)
     {
-        $this->booking->loadMissing('package', 'payment');
+        $this->booking->loadMissing('package', 'hotel', 'hotelRoom', 'payment');
     }
 
     /**
@@ -29,7 +29,7 @@ class BookingPaymentSucceeded extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('packages.booking.mail_subject', ['package' => $this->booking->package->name]),
+            subject: __('packages.booking.mail_subject', ['package' => $this->booking->bookedItemName()]),
         );
     }
 

@@ -332,6 +332,32 @@
             </div>
         </div>
     </section>
+    @if ($hotels->isNotEmpty())
+        <section id="hotels" class="section-padding bg-background">
+            <div class="container mx-auto">
+                <div class="text-center mb-20">
+                    <p class="text-primary font-semibold tracking-[0.25em] uppercase text-xs mb-4">{{ __('home.hotels.eyebrow') }}</p>
+                    <h2 class="text-3xl md:text-5xl font-bold text-foreground">{{ __('home.hotels.title') }}</h2>
+                    <p class="mx-auto mt-5 max-w-2xl text-muted-foreground">{{ __('home.hotels.description') }}</p>
+                </div>
+
+                <div class="mx-auto max-w-6xl">
+                    @include('sections.hotels-grid')
+                </div>
+
+                <div class="text-center mt-14">
+                    <a href="{{ route('hotels') }}"
+                       class="inline-flex items-center justify-center gap-2 rounded-xl border border-primary bg-background px-12 py-4 text-sm font-semibold text-primary shadow-md transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:bg-primary hover:text-primary-foreground hover:shadow-xl">
+                        {{ __('home.common.view_all_hotels') }}
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+                            <path d="M5 12h14"></path>
+                            <path d="{{ $forwardArrowPath }}"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+    @endif
     <section class="section-padding bg-card">
         <div class="container mx-auto">
             <div class="text-center mb-20">

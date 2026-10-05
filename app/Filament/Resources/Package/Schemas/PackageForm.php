@@ -268,7 +268,7 @@ class PackageForm
     /**
      * @return array<string, string>
      */
-    protected static function IconOptions(): array
+    public static function IconOptions(): array
     {
         return collect(Heroicon::cases())
             ->filter(fn (Heroicon $icon): bool => str_starts_with($icon->value, 'o-'))
