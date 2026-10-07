@@ -27,7 +27,7 @@ Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::redirect('/', '/'.config('app.locale'));
 
 Route::view('/docs/api', 'api-docs')->name('api-docs');
-Route::get('/docs/api/openapi.yaml', fn () => response()->file(resource_path('api/openapi.yaml'), [
+Route::get('/docs/api/openapi', fn () => response()->file(resource_path('api/openapi.yaml'), [
     'Content-Type' => 'application/yaml',
 ]))->name('api-docs.spec');
 

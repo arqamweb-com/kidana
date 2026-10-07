@@ -19,6 +19,12 @@ test('the partner api rejects requests without a token', function () {
     $this->getJson(route('api.v1.services.index'))->assertUnauthorized();
 });
 
+test('the partner api answers json 401 even when the request does not ask for json', function () {
+    $this->get(route('api.v1.services.index'))
+        ->assertUnauthorized()
+        ->assertJson(['message' => 'Unauthenticated.']);
+});
+
 test('a real partner token can read the catalog and the call is logged', function () {
     $client = ApiClient::factory()->create();
     $token = $client->createToken('integration', [ApiAbility::CatalogRead->value])->plainTextToken;

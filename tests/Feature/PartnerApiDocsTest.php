@@ -12,6 +12,10 @@ test('the partner api documentation page loads the openapi spec', function () {
         ->assertHeader('Content-Type', 'application/yaml');
 });
 
+test('the openapi spec url has no file extension so hosts that block yaml files still serve it', function () {
+    expect(route('api-docs.spec', absolute: false))->toBe('/docs/api/openapi');
+});
+
 test('the openapi spec documents every partner api route', function () {
     $spec = Yaml::parseFile(resource_path('api/openapi.yaml'));
 

@@ -22,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
         ]);
 
+        $middleware->redirectGuestsTo(
+            fn (Request $request): ?string => $request->is('api/*') ? null : route('filament.admin.auth.login'),
+        );
+
         $middleware->alias([
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
