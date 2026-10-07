@@ -1,0 +1,447 @@
+openapi: 3.1.0
+info:
+  title: Kidana Partner API
+  version: "1.0"
+  description: |
+    The Kidana Partner API lets travel partners read the Kidana catalog and book packages and hotel rooms.
+
+    ## Authentication
+    Send your token in the `Authorization: Bearer <token>` header. Tokens are issued by Kidana and carry abilities:
+    `catalog:read`, `bookings:create` and `bookings:read`.
+
+    ## Language
+    Send `Accept-Language` (`en`, `ar`, `fr` or `id`) to receive translated content. The response carries `Content-Language`.
+
+    ## Prices
+    All prices are in EGP and already include your agreed markup.
+
+    ## Payment
+    Depending on your agreement, bookings are either:
+    - **Partner collects**: the booking is created as `pending` and settled monthly with Kidana. Hotel rooms stay reserved for you until Kidana confirms or cancels.
+    - **Fawry**: the booking is created as `awaiting_payment` and the response includes a `payment_url` for your customer. Unpaid hotel rooms are released after 60 minutes.
+
+    ## Rate limit
+    120 requests per minute per partner. Exceeding it returns `429`.
+
+    ## Webhooks
+    When a booking changes status, Kidana sends a `POST` to your webhook URL with this JSON body:
+    `{"event": "booking.status_changed", "status": "paid", "occurred_at": "...", "data": { ...Booking }}`.
+
+    Headers: `X-Kidana-Event`, `X-Kidana-Timestamp` and `X-Kidana-Signature: sha256=<hex>`, where the hex value is
+    `HMAC-SHA256("{X-Kidana-Timestamp}.{raw body}", your webhook secret)`. Reply with any `2xx` status;
+    failed deliveries are retried up to 6 times over about 7 hours.
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Catalog
+  - name: Bookings
+paths:
+  /services:
+    get:
+      tags: [Catalog]
+      summary: List services
+      responses:
+        "200":
+          description: Active services.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Service" }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /services/{slug}:
+    get:
+      tags: [Catalog]
+      summary: Show a service
+      parameters:
+        - $ref: "#/components/parameters/Slug"
+      responses:
+        "200":
+          description: The service.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/Service" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /packages:
+    get:
+      tags: [Catalog]
+      summary: List packages
+      parameters:
+        - { name: service, in: query, schema: { type: string }, description: "Service slug." }
+        - { name: destination, in: query, schema: { type: string }, description: "Destination slug." }
+        - { name: date, in: query, schema: { type: string, format: date }, description: "Only packages running on this date." }
+        - { name: min_price, in: query, schema: { type: number } }
+        - { name: max_price, in: query, schema: { type: number } }
+        - { name: per_page, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+      responses:
+        "200":
+          description: A page of active packages.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Package" }
+                  links: { type: object }
+                  meta: { type: object }
+        "422": { $ref: "#/components/responses/ValidationError" }
+  /packages/{slug}:
+    get:
+      tags: [Catalog]
+      summary: Show a package
+      description: Includes highlights, itinerary, included and excluded items and the gallery.
+      parameters:
+        - $ref: "#/components/parameters/Slug"
+      responses:
+        "200":
+          description: The package.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/Package" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /hotels:
+    get:
+      tags: [Catalog]
+      summary: List hotels
+      parameters:
+        - { name: destination, in: query, schema: { type: string }, description: "Destination slug." }
+        - { name: per_page, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+      responses:
+        "200":
+          description: A page of active hotels.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Hotel" }
+  /hotels/{slug}:
+    get:
+      tags: [Catalog]
+      summary: Show a hotel with its rooms
+      parameters:
+        - $ref: "#/components/parameters/Slug"
+      responses:
+        "200":
+          description: The hotel and its active room types.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/Hotel" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /hotels/{slug}/availability:
+    get:
+      tags: [Catalog]
+      summary: Check room availability for a stay
+      parameters:
+        - $ref: "#/components/parameters/Slug"
+        - { name: check_in, in: query, required: true, schema: { type: string, format: date } }
+        - { name: check_out, in: query, required: true, schema: { type: string, format: date }, description: "At most 30 nights after check_in." }
+        - { name: adults, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: children, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+      responses:
+        "200":
+          description: Availability per room type.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      hotel: { type: string }
+                      check_in: { type: string, format: date }
+                      check_out: { type: string, format: date }
+                      nights: { type: integer }
+                      adults: { type: integer }
+                      children: { type: integer }
+                      currency: { type: string, example: EGP }
+                      rooms:
+                        type: array
+                        items:
+                          allOf:
+                            - $ref: "#/components/schemas/HotelRoom"
+                            - type: object
+                              properties:
+                                available_rooms: { type: integer }
+                                rooms_needed: { type: [integer, "null"], description: "Rooms of this type needed for the guests, null when it cannot host them." }
+                                is_available: { type: boolean }
+                                total_for_stay: { type: [integer, "null"] }
+        "422": { $ref: "#/components/responses/ValidationError" }
+  /bookings:
+    post:
+      tags: [Bookings]
+      summary: Create a booking
+      description: Requires the `bookings:create` ability. Retrying with the same `Idempotency-Key` returns the original booking with `200` and the `Idempotent-Replayed` header.
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string, maxLength: 191 }
+          description: A unique value per booking attempt, e.g. a UUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/PackageBookingRequest"
+                - $ref: "#/components/schemas/HotelRoomBookingRequest"
+      responses:
+        "201":
+          description: The booking was created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/Booking" }
+        "200":
+          description: A booking with this Idempotency-Key already exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/Booking" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+        "503": { description: "Online payment is temporarily unavailable." }
+  /bookings/{reference}:
+    get:
+      tags: [Bookings]
+      summary: Show one of your bookings
+      description: Requires the `bookings:read` ability.
+      parameters:
+        - $ref: "#/components/parameters/Reference"
+      responses:
+        "200":
+          description: The booking.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/Booking" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /bookings/{reference}/cancel:
+    post:
+      tags: [Bookings]
+      summary: Cancel a pending or unpaid booking
+      description: Requires the `bookings:create` ability. Paid bookings cannot be cancelled through the API.
+      parameters:
+        - $ref: "#/components/parameters/Reference"
+      responses:
+        "200":
+          description: The cancelled booking.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/Booking" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    Slug:
+      name: slug
+      in: path
+      required: true
+      schema: { type: string }
+    Reference:
+      name: reference
+      in: path
+      required: true
+      schema: { type: string, example: KD-7Q2XK9PLMA }
+  responses:
+    Unauthenticated:
+      description: Missing or invalid token.
+    Forbidden:
+      description: The token lacks the ability, the partner is disabled, or the IP is not allowed.
+    NotFound:
+      description: Not found.
+    ValidationError:
+      description: The request is invalid.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items: { type: string }
+  schemas:
+    Destination:
+      type: object
+      properties:
+        slug: { type: string }
+        name: { type: string }
+        image_url: { type: [string, "null"] }
+    Service:
+      type: object
+      properties:
+        slug: { type: string }
+        name: { type: string }
+        description: { type: [string, "null"] }
+        image_url: { type: [string, "null"] }
+        packages_count: { type: integer }
+    Package:
+      type: object
+      properties:
+        slug: { type: string }
+        name: { type: string }
+        description: { type: [string, "null"] }
+        price: { type: integer, description: "Price in EGP including your markup." }
+        currency: { type: string, example: EGP }
+        location: { type: [string, "null"] }
+        start_date: { type: [string, "null"], format: date }
+        end_date: { type: [string, "null"], format: date }
+        days: { type: [integer, "null"] }
+        max_guests: { type: [integer, "null"] }
+        image_url: { type: [string, "null"] }
+        service:
+          type: [object, "null"]
+          properties:
+            slug: { type: string }
+            name: { type: string }
+        destination: { $ref: "#/components/schemas/Destination" }
+        highlights: { description: "Only on the package details endpoint." }
+        itinerary: { description: "Only on the package details endpoint." }
+        included_items: { description: "Only on the package details endpoint." }
+        excluded_items: { description: "Only on the package details endpoint." }
+        gallery: { type: array, items: { type: string }, description: "Only on the package details endpoint." }
+    HotelRoom:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: [string, "null"] }
+        bed_type: { type: [string, "null"] }
+        size_sqm: { type: [integer, "null"] }
+        max_adults: { type: integer }
+        max_children: { type: integer }
+        price_per_night: { type: integer, description: "Price per room per night in EGP including your markup." }
+        currency: { type: string, example: EGP }
+        amenities: { type: array, items: { type: string } }
+        image_url: { type: [string, "null"] }
+    Hotel:
+      type: object
+      properties:
+        slug: { type: string }
+        name: { type: string }
+        description: { type: [string, "null"] }
+        address: { type: [string, "null"] }
+        stars: { type: [integer, "null"] }
+        board_basis: { type: [string, "null"], enum: [room_only, bed_and_breakfast, half_board, full_board, all_inclusive, null] }
+        check_in_time: { type: [string, "null"] }
+        check_out_time: { type: [string, "null"] }
+        cancellation_policy: { type: [string, "null"] }
+        amenities: {}
+        image_url: { type: [string, "null"] }
+        gallery: { type: array, items: { type: string } }
+        destination: { $ref: "#/components/schemas/Destination" }
+        rooms:
+          type: array
+          description: Only on the hotel details endpoint.
+          items: { $ref: "#/components/schemas/HotelRoom" }
+    Customer:
+      type: object
+      required: [customer_name, customer_email, customer_mobile]
+      properties:
+        customer_name: { type: string, maxLength: 255 }
+        customer_email: { type: string, format: email }
+        customer_mobile: { type: string, description: "Egyptian mobile (01XXXXXXXXX) for Fawry partners, otherwise 7-15 digits with an optional +." }
+        message: { type: string, maxLength: 2000 }
+        external_reference: { type: string, maxLength: 191, description: "Your own booking reference." }
+    PackageBookingRequest:
+      allOf:
+        - $ref: "#/components/schemas/Customer"
+        - type: object
+          required: [type, package]
+          properties:
+            type: { type: string, const: package }
+            package: { type: string, description: "Package slug." }
+            guests: { type: integer, minimum: 1 }
+            travel_date: { type: string, format: date }
+    HotelRoomBookingRequest:
+      allOf:
+        - $ref: "#/components/schemas/Customer"
+        - type: object
+          required: [type, hotel_room_id, check_in, check_out, rooms, adults]
+          properties:
+            type: { type: string, const: hotel_room }
+            hotel_room_id: { type: integer }
+            check_in: { type: string, format: date }
+            check_out: { type: string, format: date }
+            rooms: { type: integer, minimum: 1, maximum: 10 }
+            adults: { type: integer, minimum: 1, description: "At least one adult per room." }
+            children: { type: integer, minimum: 0 }
+    Booking:
+      type: object
+      properties:
+        reference: { type: string, example: KD-7Q2XK9PLMA }
+        external_reference: { type: [string, "null"] }
+        status: { type: string, enum: [pending, awaiting_payment, paid, failed, expired, cancelled, refunded, partial_refunded] }
+        kind: { type: string, enum: [package, hotel_room] }
+        package:
+          type: object
+          description: Present for package bookings.
+          properties:
+            slug: { type: string }
+            name: { type: string }
+        hotel:
+          type: object
+          description: Present for hotel room bookings.
+          properties:
+            slug: { type: string }
+            name: { type: string }
+            room_id: { type: integer }
+            room_name: { type: string }
+            check_in: { type: string, format: date }
+            check_out: { type: string, format: date }
+            nights: { type: integer }
+            rooms: { type: integer }
+            adults: { type: integer }
+            children: { type: integer }
+        travel_date: { type: [string, "null"], format: date }
+        guests: { type: [integer, "null"] }
+        customer:
+          type: object
+          properties:
+            name: { type: string }
+            email: { type: string }
+            mobile: { type: string }
+        message: { type: [string, "null"] }
+        total_amount: { type: number }
+        currency: { type: string, example: EGP }
+        payment_url: { type: string, description: "Present while a Fawry booking is awaiting payment." }
+        paid_at: { type: [string, "null"], format: date-time }
+        created_at: { type: string, format: date-time }

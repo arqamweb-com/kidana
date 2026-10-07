@@ -16,6 +16,7 @@ class BookingInfolist
                 Section::make('Booking')
                     ->schema([
                         TextEntry::make('id')->label('Booking ID'),
+                        TextEntry::make('reference')->copyable(),
                         TextEntry::make('package.name')
                             ->label('Package')
                             ->hidden(fn (Booking $record): bool => $record->isHotelBooking()),
@@ -33,6 +34,13 @@ class BookingInfolist
                         TextEntry::make('created_at')->dateTime(),
                     ])
                     ->columns(2),
+                Section::make('Partner API')
+                    ->schema([
+                        TextEntry::make('apiClient.name')->label('Partner'),
+                        TextEntry::make('external_reference')->label('Partner reference')->placeholder('-'),
+                    ])
+                    ->columns(2)
+                    ->visible(fn (Booking $record): bool => $record->isFromApi()),
                 Section::make('Hotel Stay')
                     ->schema([
                         TextEntry::make('hotelRoom.name')->label('Room type'),

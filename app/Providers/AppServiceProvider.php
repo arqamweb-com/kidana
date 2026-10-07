@@ -5,6 +5,9 @@ namespace App\Providers;
 use App\Models\Destination;
 use App\Models\Service;
 use App\Services\FawryService;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        RateLimiter::for('partner-api', fn (Request $request): Limit => Limit::perMinute(config('partner_api.rate_limit_per_minute'))
+            ->by('api-client:'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
 
         View::composer('layout.navbar', function ($view): void {
             if (! Schema::hasTable('services')) {

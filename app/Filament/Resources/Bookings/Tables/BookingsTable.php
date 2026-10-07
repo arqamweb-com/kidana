@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Bookings\Tables;
 
+use App\Enum\BookingSource;
 use App\Enum\BookingStatus;
 use App\Enum\PackageOrderAction;
 use App\Models\Booking;
@@ -20,11 +21,15 @@ class BookingsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['package', 'hotel', 'hotelRoom']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['package', 'hotel', 'hotelRoom', 'apiClient:id,name']))
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
+                TextColumn::make('reference')
+                    ->searchable()
+                    ->copyable()
+                    ->toggleable(),
                 TextColumn::make('customer_name')
                     ->searchable()
                     ->sortable(),
@@ -49,6 +54,12 @@ class BookingsTable
                     ->badge()
                     ->formatStateUsing(fn ($state): string => $state?->value ?? (string) $state)
                     ->toggleable(),
+                TextColumn::make('source')
+                    ->badge()
+                    ->formatStateUsing(fn ($state): string => $state?->value ?? (string) $state)
+                    ->color(fn ($state): string => $state === BookingSource::Api ? 'info' : 'gray')
+                    ->description(fn (Booking $record): ?string => $record->apiClient?->name)
+                    ->toggleable(),
                 TextColumn::make('total_amount')
                     ->money('EGP')
                     ->sortable(),
@@ -71,6 +82,13 @@ class BookingsTable
                         true: fn (Builder $query) => $query->whereNotNull('hotel_id'),
                         false: fn (Builder $query) => $query->whereNull('hotel_id'),
                     ),
+                SelectFilter::make('source')
+                    ->options(BookingSource::options()),
+                SelectFilter::make('api_client_id')
+                    ->label('API partner')
+                    ->relationship('apiClient', 'name')
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('hotel_id')
                     ->label('Hotel')
                     ->relationship('hotel', 'name')

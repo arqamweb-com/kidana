@@ -20,26 +20,30 @@ class BookingService
 {
     /**
      * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $attributes  Extra booking columns, e.g. the partner API source and price.
      */
-    public function createCustomBooking(Package $package, array $data, string $locale): Booking
+    public function createCustomBooking(Package $package, array $data, string $locale, array $attributes = []): Booking
     {
         return Booking::create([
             ...$this->bookingAttributes($package, $data, $locale),
             'type' => PackageOrderAction::CustomForm,
             'status' => BookingStatus::Pending,
+            ...$attributes,
         ]);
     }
 
     /**
      * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $attributes  Extra booking columns, e.g. the partner API source and price.
      */
-    public function createFawryBooking(Package $package, array $data, string $locale): Booking
+    public function createFawryBooking(Package $package, array $data, string $locale, array $attributes = []): Booking
     {
-        return DB::transaction(function () use ($package, $data, $locale): Booking {
+        return DB::transaction(function () use ($package, $data, $locale, $attributes): Booking {
             $booking = Booking::create([
                 ...$this->bookingAttributes($package, $data, $locale),
                 'type' => PackageOrderAction::FawryPayment,
                 'status' => BookingStatus::AwaitingPayment,
+                ...$attributes,
             ]);
 
             $this->createFawryPayment($booking);
@@ -51,13 +55,15 @@ class BookingService
     /**
      * @param  array{room: HotelRoom, check_in: Carbon, check_out: Carbon, nights: int, rooms: int, adults: int, children: int, total: int}  $stay
      * @param  array<string, mixed>  $customer
+     * @param  array<string, mixed>  $attributes  Extra booking columns, e.g. the partner API source.
+     * @param  PackageOrderAction|null  $orderAction  Overrides the hotel's own order action.
      */
-    public function createHotelBooking(array $stay, array $customer, string $locale): Booking
+    public function createHotelBooking(array $stay, array $customer, string $locale, array $attributes = [], ?PackageOrderAction $orderAction = null): Booking
     {
         $room = $stay['room'];
-        $orderAction = $room->hotel->order_action;
+        $orderAction ??= $room->hotel->order_action;
 
-        return DB::transaction(function () use ($room, $stay, $customer, $locale, $orderAction): Booking {
+        return DB::transaction(function () use ($room, $stay, $customer, $locale, $orderAction, $attributes): Booking {
             HotelRoom::query()->whereKey($room->id)->lockForUpdate()->first();
 
             if ($room->availableRoomsBetween($stay['check_in'], $stay['check_out']) < $stay['rooms']) {
@@ -88,6 +94,7 @@ class BookingService
                     : BookingStatus::Pending,
                 'total_amount' => $stay['total'],
                 'currency' => 'EGP',
+                ...$attributes,
             ]);
 
             if ($orderAction === PackageOrderAction::FawryPayment) {
@@ -96,6 +103,28 @@ class BookingService
 
             return $booking->loadMissing('hotel', 'hotelRoom', 'payment');
         });
+    }
+
+    /**
+     * Cancels a booking that has not been paid yet, together with its pending payment.
+     */
+    public function cancelBooking(Booking $booking): Booking
+    {
+        if (! in_array($booking->status, [BookingStatus::Pending, BookingStatus::AwaitingPayment], true)) {
+            throw ValidationException::withMessages([
+                'status' => 'Only pending or unpaid bookings can be cancelled.',
+            ]);
+        }
+
+        DB::transaction(function () use ($booking): void {
+            $booking->payment()
+                ->where('status', PaymentStatus::Pending)
+                ->update(['status' => PaymentStatus::Cancelled]);
+
+            $booking->update(['status' => BookingStatus::Cancelled]);
+        });
+
+        return $booking->refresh();
     }
 
     /**

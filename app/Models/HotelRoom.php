@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\BookingSource;
 use App\Enum\BookingStatus;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
@@ -93,6 +94,11 @@ class HotelRoom extends Model
             ->whereDate('check_out', '>', $checkIn->toDateString())
             ->where(function (Builder $query): void {
                 $query->where('status', BookingStatus::Paid)
+                    ->orWhere(function (Builder $query): void {
+                        // Partners that collect payment themselves hold rooms until Kidana confirms or cancels.
+                        $query->where('status', BookingStatus::Pending)
+                            ->where('source', BookingSource::Api);
+                    })
                     ->orWhere(function (Builder $query): void {
                         $query->where('status', BookingStatus::AwaitingPayment)
                             ->where('created_at', '>=', now()->subMinutes(self::PENDING_PAYMENT_HOLD_MINUTES));
