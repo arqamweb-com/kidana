@@ -41,13 +41,13 @@
                             {{ $service->name }}
                         </a>
                     @endforeach
+                    <a href="{{ route('hotels') }}"
+                       class="block px-5 py-3 text-sm text-muted-foreground transition-colors duration-200 hover:bg-muted hover:text-foreground">{{ __('nav.hotels') }}</a>
                 </div>
             </div>
 
             <a href="{{ route('packages') }}" data-nav-link
                class="relative inline-flex items-center gap-2 text-sm font-medium text-foreground transition-all duration-300 after:absolute after:bottom-[-4px] after:start-0 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:text-primary hover:after:w-full">{{ __('nav.packages') }}</a>
-            <a href="{{ route('hotels') }}" data-nav-link
-               class="relative inline-flex items-center gap-2 text-sm font-medium text-foreground transition-all duration-300 after:absolute after:bottom-[-4px] after:start-0 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:text-primary hover:after:w-full">{{ __('nav.hotels') }}</a>
             <a href="{{ route('umrah-plus') }}" data-nav-link
                class="relative inline-flex items-center gap-2 text-sm font-medium text-foreground transition-all duration-300 after:absolute after:bottom-[-4px] after:start-0 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 hover:text-primary hover:after:w-full">
                 <span>{{ __('nav.umrah_plus') }}</span>
@@ -148,12 +148,12 @@
                             {{ $service->name }}
                         </a>
                     @endforeach
+                    <a href="{{ route('hotels') }}"
+                       class="rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">{{ __('nav.hotels') }}</a>
                 </div>
             </div>
             <a href="{{ route('packages') }}"
                class="inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">{{ __('nav.packages') }}</a>
-            <a href="{{ route('hotels') }}"
-               class="inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">{{ __('nav.hotels') }}</a>
             <a href="{{ route('umrah-plus') }}"
                class="inline-flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:bg-muted/50 hover:text-primary">
                 <span>{{ __('nav.umrah_plus') }}</span>
