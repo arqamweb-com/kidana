@@ -22,6 +22,8 @@ function fakeLegacyImageHost(): void
     Http::fake([
         'sharm-club.com/assets/images/missing/*' => Http::response('Not found', 404),
         'www.sharm-club.com/assets/images/html/*' => Http::response('<html></html>', 200, ['Content-Type' => 'text/html']),
+        'www.sharm-club.com/assets/images/untyped-html/*' => Http::response('<html><body>Page</body></html>', 200, ['Content-Type' => '']),
+        'www.sharm-club.com/assets/images/untyped-webp/*' => Http::response(base64_decode('UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA=='), 200, ['Content-Type' => '']),
         '*' => Http::response('fake-jpeg-bytes', 200, ['Content-Type' => 'image/jpeg']),
     ]);
 }
@@ -93,7 +95,18 @@ test('failed downloads keep the original url and are reported', function (string
 })->with([
     'not found' => 'https://www.sharm-club.com/assets/images/missing/gone.jpg',
     'not an image' => 'https://www.sharm-club.com/assets/images/html/page.jpg',
+    'html without a content type' => 'https://www.sharm-club.com/assets/images/untyped-html/page.webp',
 ]);
+
+test('an image served without a content type is accepted when its bytes are an image', function () {
+    fakeLegacyImageHost();
+    $package = legacyImagePackage(['image_url' => 'https://www.sharm-club.com/assets/images/untyped-webp/tour.webp']);
+
+    $this->artisan('packages:localize-legacy-images')->assertSuccessful();
+
+    expect($package->refresh()->image_url)->toBe('packages/legacy/untyped-webp/tour.webp');
+    Storage::disk('public')->assertExists('packages/legacy/untyped-webp/tour.webp');
+});
 
 test('images on other hosts and relative paths are left alone', function () {
     fakeLegacyImageHost();

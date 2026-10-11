@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use finfo;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
@@ -159,13 +160,17 @@ class LegacyPackageImageLocalizer
             return "HTTP {$response->status()}";
         }
 
+        $body = $response->body();
         $contentType = strtolower((string) $response->header('Content-Type'));
 
-        if (! str_starts_with($contentType, 'image/')) {
-            return 'Not an image ('.($contentType === '' ? 'no content type' : $contentType).')';
+        // The old site serves some .webp files without a Content-Type, so sniff the bytes when the header is missing.
+        if ($contentType === '') {
+            $contentType = (string) (new finfo(FILEINFO_MIME_TYPE))->buffer($body);
         }
 
-        $body = $response->body();
+        if (! str_starts_with($contentType, 'image/')) {
+            return "Not an image ({$contentType})";
+        }
 
         if (! Storage::disk('public')->put($path, $body)) {
             return 'Could not write to the public disk';
