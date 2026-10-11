@@ -49,3 +49,19 @@ test('sitemap exposes localized public urls and active packages', function () {
     $response->assertSee(route('home', ['locale' => 'en']), false);
     $response->assertSee(route('packages.show', ['locale' => 'en', 'package' => $package->slug]), false);
 });
+
+test('package pages render absolute og and twitter image urls for local images', function () {
+    config(['filesystems.disks.public.url' => '/storage']);
+
+    $package = Package::factory()->create([
+        'slug' => 'local-image-package',
+        'image_url' => 'packages/legacy/x.jpg',
+        'is_active' => true,
+    ]);
+
+    $response = $this->get(route('packages.show', ['package' => $package->slug]));
+
+    $response->assertSuccessful();
+    $response->assertSee('<meta property="og:image" content="'.config('app.url').'/storage/packages/legacy/x.jpg">', false);
+    $response->assertSee('<meta name="twitter:image" content="'.config('app.url').'/storage/packages/legacy/x.jpg">', false);
+});

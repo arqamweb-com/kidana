@@ -50,14 +50,14 @@
     <meta property="og:url" content="@yield('canonical', url()->current())">
     <meta property="og:site_name" content="{{ config('app.name') }}">
     @hasSection('seo_image')
-        <meta property="og:image" content="@yield('seo_image')">
+        <meta property="og:image" content="{!! url($__env->yieldContent('seo_image')) !!}">
     @endif
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="@yield('title', config('app.name'))">
     <meta name="twitter:description"
           content="@yield('meta_description', config('app.name') . ' premium travel packages and services.')">
     @hasSection('seo_image')
-        <meta name="twitter:image" content="@yield('seo_image')">
+        <meta name="twitter:image" content="{!! url($__env->yieldContent('seo_image')) !!}">
     @endif
 
     @stack('head')
